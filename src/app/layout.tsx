@@ -26,7 +26,7 @@ export default function RootLayout({
       <body
         className={`${myRoboto.variable} antialiased`}
       >
-        <nav className="h-[50px]">
+        <nav className="h-[50px] p-[20px]">
           <Link href="/">Home</Link>
           <Link href="/about">About</Link>
         </nav>
