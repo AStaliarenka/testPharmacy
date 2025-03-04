@@ -14,9 +14,13 @@ function useAptekaApi() {
         get: async () => {
             clearErrors()
 
-            try {
-                const BASE_URL = "http://localhost:9080"
+            const BASE_URL = process.env.NEXT_PUBLIC_SERVER_HOST
 
+            if (!BASE_URL) {
+                return
+            }
+
+            try {
                 setLoading(true)
 
                 const res = await fetch(
