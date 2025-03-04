@@ -1,4 +1,11 @@
 .pharmCard {
     background-color: white;
     border-radius: 10px;
+
+    /* TODO: check */
+    /* margin: 10px;  */
+}
+
+.pharmCard__container {
+    padding: 15px;
 }
