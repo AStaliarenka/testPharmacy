@@ -16,9 +16,11 @@ const PRODUCTS_COUNT = 12
 
 function ProductsFilter() {
     return (
-        <div className="pharmProducts__filter pharmCard w-[300px] h-[500px]">
-            <div className="pharmCard__container">
-                <button className="h-[50px] bg-gray-200 w-full rounded-[5px]">Антибактериальные средства</button>
+        <div className="pharmProducts__filter filter pharmCard w-[300px] h-[500px]">
+            <div className="filter__header border-b-1 border-[var(--gray-100)]">
+                <div className="pharmCard__container">
+                    <button className="h-[50px] bg-[var(--gray-100)] w-full rounded-[5px]">Антибактериальные средства</button>
+                </div>
             </div>
             <div className="pharmCard__container">
                 <button>OPA</button>

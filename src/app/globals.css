@@ -3,6 +3,8 @@
 :root {
   --white: white;
 
+  --black-800: #171717;
+
   --gray-100: #F4F6FA;
   --gray-500: #EAEEF4;
 
@@ -11,7 +13,7 @@
   --red-600: #f60d47;
 
   --background: var(--gray-100);
-  --foreground: #171717;
+  --foreground: var(--black-800);
 }
 
 body {
