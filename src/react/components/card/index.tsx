@@ -18,16 +18,18 @@ function Card({cardData: {
     title
 }}: CardProps) {
     return (
-        <div className="myCard flex flex-col bg-[--white] p-[20px] w-[255px] h-[430px]">
-            {/* TODO: check width and height */}
-            <Image width={IMG_WIDTH} height={IMG_HEIGHT} className="myCard__image" src={image} alt="cardImage"/>
-            {isByPrescription ? <div>по рецепту</div> : null}
-            <div className="">{price}</div>
-            <div>{title}</div>
-            <div>{brand}</div>
-            <div className="myCard__bottomRow flex flex-row justify-between">
-                <button className="myCard__AddButton">В корзину</button>
-                <div>H</div>
+        <div className="myCard pharmCard">
+            <div className="pharmCard__container flex flex-col bg-[--white] w-[215px] h-[430px]">
+                {/* TODO: check width and height */}
+                <Image width={IMG_WIDTH} height={IMG_HEIGHT} className="myCard__image" src={image} alt="cardImage"/>
+                {isByPrescription ? <div>по рецепту</div> : null}
+                <div className="">{price}</div>
+                <div>{title}</div>
+                <div>{brand}</div>
+                <div className="myCard__bottomRow flex flex-row justify-between">
+                    <button className="myCard__AddButton">В корзину</button>
+                    <div>H</div>
+                </div>
             </div>
         </div>
     )
