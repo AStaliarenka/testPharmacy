@@ -2,6 +2,8 @@ import { useState } from "react"
 
 import { PharmProduct } from "./@types"
 
+import {data as MOCK_DATA} from "./mockData"
+
 function useAptekaApi() {
     const [isLoading, setLoading] = useState(false)
     const [isError, setError] = useState<Error | null>(null)
@@ -17,7 +19,7 @@ function useAptekaApi() {
             const BASE_URL = process.env.NEXT_PUBLIC_SERVER_HOST
 
             if (!BASE_URL) {
-                return
+                return MOCK_DATA
             }
 
             try {
