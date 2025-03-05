@@ -28,6 +28,7 @@ export default function RootLayout({
       >
         <nav className="h-[50px] p-[20px]">
           <Link href="/">Home</Link>
+          <span className="m-[0_10px]">/</span>
           <Link href="/about">About</Link>
         </nav>
         <div>

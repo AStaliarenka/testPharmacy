@@ -66,7 +66,7 @@ function getPriceLimits(productsData: TransformedPharmProductsData[]) {
 
 function ProductsFilter({allFiltersValues}: {allFiltersValues: AllFiltersValues | undefined}) {
     return (
-        <div className="pharmProducts__filter filter pharmCard w-[300px] h-[500px]">
+        <div className="pharmProducts__filter filter pharmCard w-[300px]">
             <div className="filter__header border-b-1 border-[var(--gray-100)]">
                 <div className="pharmCard__container">
                     <button className="h-[50px] bg-[var(--gray-100)] w-full rounded-[5px]">Антибактериальные средства</button>
@@ -83,11 +83,12 @@ function getProductsPages(count: number, productsCount: number) {
     return Math.round(count/productsCount)
 }
 
+// TODO: create sort
 function SortBlock() {
     return (
-        <div className="pharmProducts__sortRow w-[200px] h-[50px]">
+        <button disabled={true} className="pharmProducts__sortRow w-[200px] h-[50px] bg-[var(--white)] rounded-[50px]">
             SORT
-        </div>
+        </button>
     )
 }
 
@@ -114,9 +115,9 @@ function SelectedFiltersBlock({selectedFilters, deleteFilter}: {selectedFilters:
 
 function FilterButton({filterName, closeHandler}: {filterName: ProductFilter, closeHandler: (a: ProductFilter) => void}) {
     return (
-        <div className="filterButton bg-[var(--white)] mr-[10px] p-[10px]">
-            <span>{filterName}</span>
-            <button onClick={() => closeHandler(filterName)}>X</button>
+        <div className="filterButton bg-[var(--gray-500)] mr-[10px] p-[0_20px] rounded-[30px] h-[30px] flex flex-row justify-between align-middle">
+            <span className="leading-[30px]">{filterName}</span>
+            <button className="ml-[10px]" onClick={() => closeHandler(filterName)}>x</button>
         </div>
     )
 }
@@ -143,18 +144,20 @@ const generateFilterSections = (allFiltersValues: AllFiltersValues) => {
                     <span>Страна</span>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <>
+                    <div className="flex flex-col">
                         {
                             allFiltersValues[FILTERS_NAMES.country].map((country, index) => {
+                                const key = `${country}_${index}`
+
                                 return (
-                                    <>
+                                    <div className="flex flex-row" key={key}>
                                         <input className="" type="checkbox" name={`${country}_${index}`}></input>
-                                        <label htmlFor="country_1">{country}</label>
-                                    </>
+                                        <label className="ml-[5px]" htmlFor="country_1">{country}</label>
+                                    </div>
                                 )
                             })
                         }
-                    </>
+                    </div>
                 </AccordionDetails>
             </Accordion>
         </form>
@@ -285,12 +288,15 @@ function PharmProducts() {
 
     return (
         <div className="pharmProducts p-[20px]">
-            <div className="pharmProducts__header flex flex-column h-[50px]">
+            <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
                 <SelectedFiltersBlock selectedFilters={selectedFilters} deleteFilter={deleteFilter}/>
                 <SortBlock/>
             </div>
             <div className="pharmProducts__filterAndProductsList flex flex-row justify-between">
-                <ProductsFilter allFiltersValues={filtersValues}/>
+                <div className="flex flex-col">
+                    <ProductsFilter allFiltersValues={filtersValues}/>
+                    <div className="spacer min-h-[50px]"></div>
+                </div>
                 <div className="pharmProducts__productsListAndPaginator flex flex-col">
                     {productsList}
                     <div className="h-[50px]">
