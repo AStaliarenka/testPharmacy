@@ -27,9 +27,9 @@ export default function RootLayout({
         className={`${myRoboto.variable} antialiased`}
       >
         <nav className="h-[50px] p-[20px]">
-          <Link href="/">Home</Link>
+          <Link href="/">Антибактериальные средства</Link>
           <span className="m-[0_10px]">/</span>
-          <Link href="/about">About</Link>
+          <Link href="/about">Контакты</Link>
         </nav>
         <div>
           {children}
