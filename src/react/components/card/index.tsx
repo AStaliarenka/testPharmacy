@@ -1,9 +1,9 @@
 import Image from "next/image"
 
-import { PharmProduct } from "@/scripts/backend/aptekaApi/@types"
+import { TransformedPharmProductsData } from "@/react/views/pharmProducts"
 
 type CardProps = {
-    cardData: PharmProduct
+    cardData: TransformedPharmProductsData
 }
 
 const IMG_WIDTH = 215
@@ -13,7 +13,8 @@ const IMG_HEIGHT = 215
 
 function Card({cardData: {
     price,
-    characteristics: {brand, isByPrescription},
+    brand,
+    isByPrescription,
     image,
     title
 }}: CardProps) {
@@ -21,7 +22,14 @@ function Card({cardData: {
         <div className="myCard pharmCard">
             <div className="pharmCard__container flex flex-col bg-[--white] w-[215px] h-[430px]">
                 {/* TODO: check width and height */}
-                <Image width={IMG_WIDTH} height={IMG_HEIGHT} className="myCard__image" src={image} alt="cardImage"/>
+                <Image
+                    width={IMG_WIDTH}
+                    height={IMG_HEIGHT}
+                    className="myCard__image"
+                    src={image}
+                    alt="cardImage"
+                    priority={true}
+                />
                 {isByPrescription ? <div>по рецепту</div> : null}
                 <div className="">{price}</div>
                 <div>{title}</div>
