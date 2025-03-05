@@ -16,8 +16,6 @@ import "./style.css"
 import { AllFiltersValues, ProductFilter, SelectedFilters, TransformedPharmProductsData } from "./@types"
 import { PRODUCTS_FIELDS, FILTERS_NAMES } from "./constants"
 
-
-
 const PRODUCTS_COUNT = 12
 
 function transformPharmProductsData(productsData: PharmProduct[]): TransformedPharmProductsData[] {
@@ -122,6 +120,7 @@ function FilterButton({filterName, closeHandler}: {filterName: ProductFilter, cl
     )
 }
 
+// TODO: change
 const generateFilterSections = (allFiltersValues: AllFiltersValues) => {
     return (
         <form onChange={(e) => {console.log(e)}}>
