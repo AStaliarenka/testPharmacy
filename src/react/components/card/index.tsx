@@ -21,7 +21,7 @@ function Card({cardData: {
     title
 }}: CardProps) {
     return (
-        <div className="myCard pharmCard">
+        <div className="myCard pharmCard min-w-[245px]">
             <div className="pharmCard__container flex flex-col bg-[--white] w-[245px]">
                 {/* TODO: check width and height */}
                 <Image

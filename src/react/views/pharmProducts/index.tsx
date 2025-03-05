@@ -268,7 +268,7 @@ function PharmProducts() {
 
     if (!isLoading && !isError && filteredData) {
         productsList = (
-            <div className="cardList grid grid-cols-4 grid-rows-3 gap-4">
+            <div className="cardList grid grid-cols-4 grid-rows-3 gap-y-5 gap-x-5">
                 {generateCardList(filteredData, page, PRODUCTS_COUNT)}
             </div>
         )
