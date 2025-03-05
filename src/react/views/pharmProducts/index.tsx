@@ -86,8 +86,8 @@ function getProductsPages(count: number, productsCount: number) {
 // TODO: create sort
 function SortBlock() {
     return (
-        <button disabled={true} className="pharmProducts__sortRow w-[200px] h-[50px] bg-[var(--white)] rounded-[50px]">
-            SORT
+        <button disabled={true} className="pharmProducts__sortRow w-[200px] h-[50px] bg-[var(--gray-500)] rounded-[50px]">
+            Сортировка
         </button>
     )
 }
@@ -132,8 +132,8 @@ const generateFilterSections = (allFiltersValues: AllFiltersValues) => {
                 <AccordionDetails>
                     <>
                         <div className="topRow flex flex-row justify-between">
-                            <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="minPrice"></input>
-                            <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="maxPrice"></input>
+                            <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="minPrice" placeholder="От"></input>
+                            <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="maxPrice" placeholder="До"></input>
                         </div>
                         <div className="bottomRow"></div>
                     </>
