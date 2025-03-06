@@ -8,7 +8,7 @@ import useAptekaApi from "@/scripts/backend/aptekaApi/aptekaApi"
 import { PharmProduct } from "@/scripts/backend/aptekaApi/@types"
 
 import "./style.css"
-import { AllFiltersValues, ProductFilter, SelectedFilters, TransformedPharmProductsData } from "./@types"
+import { AllFiltersValues, PharmProductIsByPrescription, ProductFilter, SelectedFilters, TransformedPharmProductsData } from "./@types"
 import { PRODUCTS_FIELDS, FILTERS_NAMES } from "./constants"
 import FilterButton from "@/react/components/filterMarker"
 import CardListWithPaginator from "@/react/components/cardListWithPaginator"
@@ -21,13 +21,23 @@ function transformPharmProductsData(productsData: PharmProduct[]): TransformedPh
     const defaultImgSrc = "https://placehold.co/215x215/png"
 
     return productsData.map(product => {
+        const isByPrescription = product.characteristics.isByPrescription
+        let transformedIsByDescription: PharmProductIsByPrescription
+
+        if (isByPrescription === true || isByPrescription === false) {
+            transformedIsByDescription = isByPrescription
+        }
+        else {
+            transformedIsByDescription = ""
+        }
+
         return {
             [PRODUCTS_FIELDS.title]: product.title,
             [PRODUCTS_FIELDS.id]: product.id,
             [PRODUCTS_FIELDS.price]: product.price || "",
             [PRODUCTS_FIELDS.country]: product.characteristics.country || "",
             [PRODUCTS_FIELDS.brand]: product.characteristics.brand || "",
-            [PRODUCTS_FIELDS.isByPrescription]: product.characteristics.isByPrescription || "",
+            [PRODUCTS_FIELDS.isByPrescription]: transformedIsByDescription,
             [PRODUCTS_FIELDS.image]: product.image || defaultImgSrc
         }
     })
@@ -95,16 +105,38 @@ function SelectedFiltersBlock({selectedFilters, deleteFilter}: SelectedFiltersBl
     )
 }
 
+const getBooleanFilterValues = (products: TransformedPharmProductsData[], filterName: ProductFilter) => {
+    let hasTrue = false, hasFalse = false
+    let isNeedToCreateFilter = false
 
+    for (const product of products) {
+        isNeedToCreateFilter = hasTrue && hasFalse
+
+        if (isNeedToCreateFilter) {
+            break
+        }
+
+        if (product[filterName] === true) {
+            hasTrue = true
+        }
+        else if (product[filterName] === false) {
+            hasFalse = true
+        }
+    }
+
+    return isNeedToCreateFilter ? [true] : []
+}
 
 function setNewFilterValues(products: TransformedPharmProductsData[]) {
     // TODO: optimize
-    const countries = Object.keys(Object.groupBy(products, ({ country }) => country))
-    const brands = Object.keys(Object.groupBy(products, ({ brand }) => brand))
-    const priceLimits = getPriceLimits(products)
+    const countries = Object.keys(Object.groupBy(products, ({ country }) => country)) || []
+    const brands = Object.keys(Object.groupBy(products, ({ brand }) => brand)) || []
+    const isByPrescription = getBooleanFilterValues(products, "isByPrescription")
+    const priceLimits = getPriceLimits(products) || []
 
     return {
         [FILTERS_NAMES.price]: priceLimits,
+        [FILTERS_NAMES.isByPrescription]: isByPrescription,
         [FILTERS_NAMES.country]: countries,
         [FILTERS_NAMES.brand]: brands,
     }

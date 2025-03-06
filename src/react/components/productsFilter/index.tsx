@@ -31,6 +31,13 @@ function ProductsFilter({allFiltersValues}: ProductsFilterProps) {
             <div className="pharmCard__container">
                 {allFiltersValues ? generateFilterForm(allFiltersValues) : null}
             </div>
+            <div className="pharmCard__container">
+                <button
+                    className='p-[8px_16px] bg-[var(--blue-400)] text-[var(--white)] rounded-[8px]'
+                >
+                    Применить фильтр
+                </button>
+            </div>
         </div>
     )
 }
@@ -41,10 +48,12 @@ const generateSection = (
     filterName: ProductFilter,
     details: React.JSX.Element,
 ) => {
+    const key = `filter-${filterName}`
+
     return (
-        <Accordion defaultExpanded={defaultExpanded}>
+        <Accordion key={key} defaultExpanded={defaultExpanded}>
             <AccordionSummary
-                id={`filter-${filterName}`}
+                id={key}
                 expandIcon={<ExpandMoreIcon />}
             >
                 <span>
@@ -63,26 +72,49 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
 
     return keys.map((filterName) => {
         if (filterName !== "price") {
-            return generateSection(
-                false,
-                FILTER_LOCALES[filterName],
-                filterName,
-                <div className="flex flex-col">
-                    {
-                        allFiltersValues[filterName].map((filterName, index) => {
-                            const inputName = `${filterName}_${index}`
-                            const key = inputName
+            const values = allFiltersValues[filterName]
 
-                            return (
-                                <div className="flex flex-row" key={key}>
-                                    <input className="" type="checkbox" name={inputName}></input>
-                                    <label className="ml-[5px]" htmlFor={inputName}>{filterName}</label>
-                                </div>
-                            )
-                        })
-                    }
-                </div>
-            )
+            if (values.length) {
+                if (values.length == 1 && values[0] === true) {
+                    const inputName = `${filterName}_${0}`
+                    const key = inputName
+
+                    return generateSection(
+                        false,
+                        FILTER_LOCALES[filterName],
+                        filterName,
+                        <div className="flex flex-row" key={key}>
+                                <input className="" type="checkbox" name={inputName}></input>
+                                <label className="ml-[5px]" htmlFor={inputName}>{FILTER_LOCALES[filterName]}</label>
+                        </div>
+                    )
+                }
+                else {
+                    return generateSection(
+                        false,
+                        FILTER_LOCALES[filterName],
+                        filterName,
+                        <div className="flex flex-col">
+                            {
+                                values.map((filterName, index) => {
+                                    const inputName = `${filterName}_${index}`
+                                    const key = inputName
+        
+                                    return (
+                                        <div className="flex flex-row" key={key}>
+                                            <input className="" type="checkbox" name={inputName}></input>
+                                            <label className="ml-[5px]" htmlFor={inputName}>{filterName}</label>
+                                        </div>
+                                    )
+                                })
+                            }
+                        </div>
+                    )
+                }
+            }
+            else {
+                return null
+            }
         }
         else {
             return generateSection(
