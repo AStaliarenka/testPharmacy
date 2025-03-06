@@ -3,9 +3,18 @@ import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
+import { ucFirst } from '@/scripts/helpers/string'
+
 import { FILTERS_NAMES } from '@/react/views/pharmProducts/constants'
 
-import { AllFiltersValues } from '@/react/views/pharmProducts/@types'
+import { AllFiltersValues, ProductFilter } from '@/react/views/pharmProducts/@types'
+
+const FILTER_LOCALES: Record<ProductFilter, string> = {
+    [FILTERS_NAMES.price]: "цена",
+    [FILTERS_NAMES.country]: "изготовитель",
+    [FILTERS_NAMES.isByPrescription]: "по рецепту",
+    [FILTERS_NAMES.brand]: "компания",
+} as const
 
 type ProductsFilterProps = {
     allFiltersValues: AllFiltersValues | undefined,
@@ -20,51 +29,83 @@ function ProductsFilter({allFiltersValues}: ProductsFilterProps) {
                 </div>
             </div>
             <div className="pharmCard__container">
-                {allFiltersValues ? generateFilterSections(allFiltersValues) : null}
+                {allFiltersValues ? generateFilterForm(allFiltersValues) : null}
             </div>
         </div>
     )
 }
 
-// TODO: change
-const generateFilterSections = (allFiltersValues: AllFiltersValues) => {
+const generateSection = (
+    defaultExpanded: boolean,
+    title: string,
+    filterName: ProductFilter,
+    details: React.JSX.Element,
+) => {
     return (
-        <form onChange={(e) => {console.log(e)}}>
-            <Accordion defaultExpanded={true}>
-                <AccordionSummary id="panel-1" expandIcon={<ExpandMoreIcon />}>
-                    <span>Цена</span>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <>
-                        <div className="topRow flex flex-row justify-between">
-                            <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="minPrice" placeholder="От"></input>
-                            <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="maxPrice" placeholder="До"></input>
-                        </div>
-                        <div className="bottomRow"></div>
-                    </>
-                </AccordionDetails>
-            </Accordion>
-            <Accordion>
-                <AccordionSummary id="panel-2" expandIcon={<ExpandMoreIcon />}>
-                    <span>Страна</span>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <div className="flex flex-col">
-                        {
-                            allFiltersValues[FILTERS_NAMES.country].map((country, index) => {
-                                const key = `${country}_${index}`
+        <Accordion defaultExpanded={defaultExpanded}>
+            <AccordionSummary
+                id={`filter-${filterName}`}
+                expandIcon={<ExpandMoreIcon />}
+            >
+                <span>
+                    {ucFirst(title)}
+                </span>
+            </AccordionSummary>
+            <AccordionDetails>
+                {details}
+            </AccordionDetails>
+        </Accordion>
+    )
+}
 
-                                return (
-                                    <div className="flex flex-row" key={key}>
-                                        <input className="" type="checkbox" name={`${country}_${index}`}></input>
-                                        <label className="ml-[5px]" htmlFor="country_1">{country}</label>
-                                    </div>
-                                )
-                            })
-                        }
+const generateSections = (allFiltersValues: AllFiltersValues) => {
+    const keys = Object.keys(allFiltersValues) as Array<keyof typeof allFiltersValues>
+
+    return keys.map((filterName) => {
+        if (filterName !== "price") {
+            return generateSection(
+                false,
+                FILTER_LOCALES[filterName],
+                filterName,
+                <div className="flex flex-col">
+                    {
+                        allFiltersValues[filterName].map((filterName, index) => {
+                            const inputName = `${filterName}_${index}`
+                            const key = inputName
+
+                            return (
+                                <div className="flex flex-row" key={key}>
+                                    <input className="" type="checkbox" name={inputName}></input>
+                                    <label className="ml-[5px]" htmlFor={inputName}>{filterName}</label>
+                                </div>
+                            )
+                        })
+                    }
+                </div>
+            )
+        }
+        else {
+            return generateSection(
+                true,
+                FILTER_LOCALES[filterName],
+                filterName,
+                <>
+                    <div className="topRow flex flex-row justify-between">
+                        <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="minPrice" placeholder="От"></input>
+                        <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="maxPrice" placeholder="До"></input>
                     </div>
-                </AccordionDetails>
-            </Accordion>
+                    <div className="bottomRow"></div>
+                </>
+            )
+        }
+    })
+}
+
+// TODO: change
+const generateFilterForm = (allFiltersValues: AllFiltersValues) => {
+    return (
+        <form  className='filter__form' onChange={(e) => {console.log(e)}}>
+            {generateSections(allFiltersValues)}
         </form>
     )
 }

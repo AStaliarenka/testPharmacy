@@ -104,9 +104,9 @@ function setNewFilterValues(products: TransformedPharmProductsData[]) {
     const priceLimits = getPriceLimits(products)
 
     return {
+        [FILTERS_NAMES.price]: priceLimits,
         [FILTERS_NAMES.country]: countries,
         [FILTERS_NAMES.brand]: brands,
-        [FILTERS_NAMES.price]: priceLimits,
     }
 }
 
