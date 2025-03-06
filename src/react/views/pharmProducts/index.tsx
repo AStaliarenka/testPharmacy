@@ -3,10 +3,7 @@
 import { useEffect, useState, useCallback } from "react"
 import useAptekaApi from "@/scripts/backend/aptekaApi/aptekaApi"
 
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+
 
 import { PharmProduct } from "@/scripts/backend/aptekaApi/@types"
 
@@ -15,6 +12,7 @@ import { AllFiltersValues, ProductFilter, SelectedFilters, TransformedPharmProdu
 import { PRODUCTS_FIELDS, FILTERS_NAMES } from "./constants"
 import FilterButton from "@/react/components/filterMarker"
 import CardListWithPaginator from "@/react/components/cardListWithPaginator"
+import ProductsFilter from "@/react/components/productsFilter"
 
 const PRODUCTS_COUNT = 12
 
@@ -62,23 +60,6 @@ function getPriceLimits(productsData: TransformedPharmProductsData[]) {
         return priceLimits
 }
 
-function ProductsFilter({allFiltersValues}: {allFiltersValues: AllFiltersValues | undefined}) {
-    return (
-        <div className="pharmProducts__filter filter pharmCard w-[300px]">
-            <div className="filter__header border-b-1 border-[var(--gray-100)]">
-                <div className="pharmCard__container">
-                    <button className="h-[50px] bg-[var(--gray-100)] w-full rounded-[5px]">Антибактериальные средства</button>
-                </div>
-            </div>
-            <div className="pharmCard__container">
-                {allFiltersValues ? generateFilterSections(allFiltersValues) : null}
-            </div>
-        </div>
-    )
-}
-
-
-
 // TODO: create sort
 function SortBlock() {
     return (
@@ -114,48 +95,7 @@ function SelectedFiltersBlock({selectedFilters, deleteFilter}: SelectedFiltersBl
     )
 }
 
-// TODO: change
-const generateFilterSections = (allFiltersValues: AllFiltersValues) => {
-    return (
-        <form onChange={(e) => {console.log(e)}}>
-            <Accordion defaultExpanded={true}>
-                <AccordionSummary id="panel-1" expandIcon={<ExpandMoreIcon />}>
-                    <span>Цена</span>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <>
-                        <div className="topRow flex flex-row justify-between">
-                            <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="minPrice" placeholder="От"></input>
-                            <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="maxPrice" placeholder="До"></input>
-                        </div>
-                        <div className="bottomRow"></div>
-                    </>
-                </AccordionDetails>
-            </Accordion>
-            <Accordion>
-                <AccordionSummary id="panel-2" expandIcon={<ExpandMoreIcon />}>
-                    <span>Страна</span>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <div className="flex flex-col">
-                        {
-                            allFiltersValues[FILTERS_NAMES.country].map((country, index) => {
-                                const key = `${country}_${index}`
 
-                                return (
-                                    <div className="flex flex-row" key={key}>
-                                        <input className="" type="checkbox" name={`${country}_${index}`}></input>
-                                        <label className="ml-[5px]" htmlFor="country_1">{country}</label>
-                                    </div>
-                                )
-                            })
-                        }
-                    </div>
-                </AccordionDetails>
-            </Accordion>
-        </form>
-    )
-}
 
 function setNewFilterValues(products: TransformedPharmProductsData[]) {
     // TODO: optimize
@@ -239,8 +179,6 @@ function PharmProducts() {
             }
         }, [selectedFilters])
 
-    
-
     let content: React.JSX.Element
 
     if (!isLoading && !isError && filteredData) {
@@ -252,7 +190,9 @@ function PharmProducts() {
                 </div>
                 <div className="pharmProducts__filterAndProductsList flex flex-row justify-between">
                     <div className="flex flex-col">
-                        <ProductsFilter allFiltersValues={filtersValues}/>
+                        <ProductsFilter
+                            allFiltersValues={filtersValues}
+                        />
                         <div className="spacer min-h-[50px]"></div>
                     </div>
                     <CardListWithPaginator
