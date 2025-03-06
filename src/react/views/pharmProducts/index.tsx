@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import useAptekaApi from "@/scripts/backend/aptekaApi/aptekaApi"
-import Pagination from '@mui/material/Pagination'
+
 import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
@@ -10,12 +10,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { PharmProduct } from "@/scripts/backend/aptekaApi/@types"
 
-import Card from "@/react/components/card"
-
 import "./style.css"
 import { AllFiltersValues, ProductFilter, SelectedFilters, TransformedPharmProductsData } from "./@types"
 import { PRODUCTS_FIELDS, FILTERS_NAMES } from "./constants"
 import FilterButton from "@/react/components/filterMarker"
+import CardListWithPaginator from "@/react/components/cardListWithPaginator"
 
 const PRODUCTS_COUNT = 12
 
@@ -78,9 +77,7 @@ function ProductsFilter({allFiltersValues}: {allFiltersValues: AllFiltersValues 
     )
 }
 
-function getProductsPages(count: number, productsCount: number) {
-    return Math.round(count/productsCount)
-}
+
 
 // TODO: create sort
 function SortBlock() {
@@ -190,7 +187,6 @@ function PharmProducts() {
     const [priceLimit, setPriceLimit] = useState<{max: number | "", min: number | ""}>()
     const [filtersValues, setFiltersValues] = useState<AllFiltersValues>()
     const [page, setPage] = useState(1)
-    
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -226,6 +222,10 @@ function PharmProducts() {
         // TODO: filter data
     }, [selectedFilters])
 
+    const handleSetPage = useCallback((page: number) => {
+        setPage(page)
+    }, [])
+
     const deleteFilter = useCallback((deletedFilterName: ProductFilter) => {
             if (selectedFilters) {
                 const filterValue = selectedFilters[deletedFilterName]
@@ -239,73 +239,46 @@ function PharmProducts() {
             }
         }, [selectedFilters])
 
-    const generateCardList = (products: TransformedPharmProductsData[], page: number, productsCount: number) => {
-        const cardList = []
+    
 
-        const firstIndex = (page - 1) * productsCount
-
-        const lastExpectedIndex = firstIndex + productsCount
-        let lastIndex: number
-
-        if (lastExpectedIndex < products.length) {
-            lastIndex = lastExpectedIndex
-        }
-        else {
-            lastIndex = products.length
-        }
-
-        for (let i = firstIndex; i < lastIndex; i++) {
-            cardList.push(<Card key={products[i].id} cardData={products[i]}/>)
-        }
-
-        return cardList
-    }
-
-    let productsList: React.JSX.Element, pagesCount=0
+    let content: React.JSX.Element
 
     if (!isLoading && !isError && filteredData) {
-        productsList = (
-            <div className="cardList grid grid-cols-4 grid-rows-3 gap-y-5 gap-x-5">
-                {generateCardList(filteredData, page, PRODUCTS_COUNT)}
-            </div>
+        content = (
+            <>
+                <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
+                    <SelectedFiltersBlock selectedFilters={selectedFilters} deleteFilter={deleteFilter}/>
+                    <SortBlock/>
+                </div>
+                <div className="pharmProducts__filterAndProductsList flex flex-row justify-between">
+                    <div className="flex flex-col">
+                        <ProductsFilter allFiltersValues={filtersValues}/>
+                        <div className="spacer min-h-[50px]"></div>
+                    </div>
+                    <CardListWithPaginator
+                        page={page}
+                        setPage={handleSetPage}
+                        filteredData={filteredData}
+                        productsCount={PRODUCTS_COUNT}
+                    />
+                </div>
+                <div className="pharmProducts__footer h-[50px]"></div>
+            </>
         )
-
-        pagesCount = getProductsPages(filteredData.length, PRODUCTS_COUNT)
     }
     else if (isLoading) {
-        productsList = <>WAIT...</>
+        content = <>WAIT...</>
     }
     else if (isError) {
-        productsList = <>{`Error: ${isError.name}, message: ${isError.message}`}</>
+        content = <>{`Error: ${isError.name}, message: ${isError.message}`}</>
     }
     else {
-        productsList = <>WAIT...</> /* TODO: change */
+        content = <>WAIT...</> /* TODO: change */
     }
 
     return (
         <div className="pharmProducts p-[20px]">
-            <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
-                <SelectedFiltersBlock selectedFilters={selectedFilters} deleteFilter={deleteFilter}/>
-                <SortBlock/>
-            </div>
-            <div className="pharmProducts__filterAndProductsList flex flex-row justify-between">
-                <div className="flex flex-col">
-                    <ProductsFilter allFiltersValues={filtersValues}/>
-                    <div className="spacer min-h-[50px]"></div>
-                </div>
-                <div className="pharmProducts__productsListAndPaginator flex flex-col">
-                    {productsList}
-                    <div className="h-[50px]">
-                        <Pagination
-                            className="flex justify-center p-[15px]"
-                            count={pagesCount}
-                            onChange={(e, page) => {
-                                setPage(page)
-                            }}/>
-                    </div>
-                </div>
-            </div>
-            <div className="pharmProducts__footer h-[50px]"></div>
+            {content}
         </div>
     )
 }
