@@ -91,7 +91,12 @@ function SortBlock() {
     )
 }
 
-function SelectedFiltersBlock({selectedFilters, deleteFilter}: {selectedFilters: SelectedFilters | undefined, deleteFilter: (a: ProductFilter) => void}) { 
+type SelectedFiltersBlockProps = {
+    selectedFilters: SelectedFilters | undefined,
+    deleteFilter: (a: ProductFilter) => void,
+}
+
+function SelectedFiltersBlock({selectedFilters, deleteFilter}: SelectedFiltersBlockProps) { 
     let content = null, filters
 
     if (selectedFilters) {
