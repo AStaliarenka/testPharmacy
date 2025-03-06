@@ -15,6 +15,7 @@ import Card from "@/react/components/card"
 import "./style.css"
 import { AllFiltersValues, ProductFilter, SelectedFilters, TransformedPharmProductsData } from "./@types"
 import { PRODUCTS_FIELDS, FILTERS_NAMES } from "./constants"
+import FilterButton from "@/react/components/filterMarker"
 
 const PRODUCTS_COUNT = 12
 
@@ -107,15 +108,6 @@ function SelectedFiltersBlock({selectedFilters, deleteFilter}: {selectedFilters:
     return (
         <div className="pharmProducts__filtersRow flex flex-row w-full h-[50px] overflow-x-auto">
             {content}
-        </div>
-    )
-}
-
-function FilterButton({filterName, closeHandler}: {filterName: ProductFilter, closeHandler: (a: ProductFilter) => void}) {
-    return (
-        <div className="filterButton bg-[var(--gray-500)] mr-[10px] p-[0_20px] rounded-[30px] h-[30px] flex flex-row justify-between align-middle">
-            <span className="leading-[30px]">{filterName}</span>
-            <button className="ml-[10px]" onClick={() => closeHandler(filterName)}>x</button>
         </div>
     )
 }
