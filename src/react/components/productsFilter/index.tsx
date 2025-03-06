@@ -75,19 +75,29 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
             const values = allFiltersValues[filterName]
 
             if (values.length) {
-                if (values.length == 1 && values[0] === true) {
+                if (values.length == 1 && values[0] === true) { /* case with true false values */
                     const inputName = `${filterName}_${0}`
                     const key = inputName
+                    const name = ucFirst(FILTER_LOCALES[filterName])
 
-                    return generateSection(
-                        false,
-                        FILTER_LOCALES[filterName],
-                        filterName,
-                        <div className="flex flex-row" key={key}>
-                                <input className="" type="checkbox" name={inputName}></input>
-                                <label className="ml-[5px]" htmlFor={inputName}>{FILTER_LOCALES[filterName]}</label>
+                    return (
+                        <div key={key} className="pharmCard__container">
+                            <div className="flex flex-row" key={key}>
+                                    <input className="" type="checkbox" name={inputName}></input>
+                                    <label className="ml-[5px]" htmlFor={inputName}>{name}</label>
+                            </div>
                         </div>
                     )
+
+                    // return generateSection(
+                    //     false,
+                    //     FILTER_LOCALES[filterName],
+                    //     filterName,
+                    //     <div className="flex flex-row" key={key}>
+                    //             <input className="" type="checkbox" name={inputName}></input>
+                    //             <label className="ml-[5px]" htmlFor={inputName}>{FILTER_LOCALES[filterName]}</label>
+                    //     </div>
+                    // )
                 }
                 else {
                     return generateSection(

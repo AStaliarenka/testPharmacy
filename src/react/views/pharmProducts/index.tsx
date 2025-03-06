@@ -3,8 +3,6 @@
 import { useEffect, useState, useCallback } from "react"
 import useAptekaApi from "@/scripts/backend/aptekaApi/aptekaApi"
 
-
-
 import { PharmProduct } from "@/scripts/backend/aptekaApi/@types"
 
 import "./style.css"
