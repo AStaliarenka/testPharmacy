@@ -27,6 +27,8 @@ type ProductsFilterProps = {
     selectedFilters: SelectedFilters | undefined
 }
 
+const FORM_ON_CHANGE_DELAY = 500 /* ms */
+
 function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterProps) {
     const form = useRef<HTMLFormElement>(null)
 
@@ -94,7 +96,7 @@ function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterPr
         }
     }
 
-    const debouncedSetFormChanges = debounce(handleFormOnChange, 500)
+    const debouncedSetFormChanges = debounce(handleFormOnChange, FORM_ON_CHANGE_DELAY)
 
     // TODO: change
     const generateFilterForm = (allFiltersValues: AllFiltersValues) => {
