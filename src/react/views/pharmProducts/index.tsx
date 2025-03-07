@@ -203,13 +203,7 @@ function PharmProducts() {
     }, [])
 
     const handleFilterSelect = useCallback((filters: SelectedFilters) => {
-        setSelectedFilters((prevState) => {
-            if (prevState) {
-                console.log("filters", filters)
-            }
-
-            return prevState
-        })
+        setSelectedFilters(filters)
     }, [])
 
     const deleteFilter = useCallback((deletedFilterName: ProductFilter) => {

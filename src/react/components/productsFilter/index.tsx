@@ -14,7 +14,7 @@ import { FILTERS_NAMES } from '@/react/views/pharmProducts/constants'
 import { AllFiltersValues, ProductFilter, SelectedFilters, CustomPharmProductPrice } from '@/react/views/pharmProducts/@types'
 import { FormEventHandler } from 'react'
 
-const FILTER_LOCALES: Record<ProductFilter, string> = {
+export const FILTER_LOCALES: Record<ProductFilter, string> = {
     [FILTERS_NAMES.price]: "цена",
     [FILTERS_NAMES.country]: "изготовитель",
     [FILTERS_NAMES.isByPrescription]: "по рецепту",
