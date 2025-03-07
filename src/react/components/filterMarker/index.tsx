@@ -11,10 +11,13 @@ function FilterButton({filterName, closeHandler}: FilterButtonProps) {
     const buttonLabel = ucFirst(FILTER_LOCALES[filterName])
 
     return (
-        <div className="filterButton bg-[var(--gray-500)] mr-[10px] p-[0_20px] rounded-[30px] h-[30px] flex flex-row justify-between align-middle">
+        <button
+            className="filterButton bg-[var(--gray-500)] mr-[10px] p-[0_20px] rounded-[30px] h-[30px] flex flex-row justify-between align-middle"
+            onClick={() => closeHandler(filterName)}        
+        >
             <span className="leading-[30px]">{buttonLabel}</span>
-            <button className="ml-[10px]" onClick={() => closeHandler(filterName)}>x</button>
-        </div>
+            <span className="leading-[30px] ml-[10px]">x</span>
+        </button>
     )
 }
 
