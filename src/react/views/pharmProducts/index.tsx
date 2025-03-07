@@ -233,6 +233,7 @@ function PharmProducts() {
                         <ProductsFilter
                             allFiltersValues={filtersValues}
                             setSelectedFilters={handleFilterSelect}
+                            selectedFilters={selectedFilters}
                         />
                         <div className="spacer min-h-[50px]"></div>
                     </div>

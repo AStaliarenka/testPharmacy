@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, memo } from 'react'
 
 import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
@@ -24,6 +24,7 @@ export const FILTER_LOCALES: Record<ProductFilter, string> = {
 type ProductsFilterProps = {
     allFiltersValues: AllFiltersValues | undefined,
     setSelectedFilters: (filters: SelectedFilters) => void,
+    selectedFilters: SelectedFilters | undefined
 }
 
 function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterProps) {
@@ -92,15 +93,25 @@ function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterPr
             setSelectedFilters(result)
         }
     }
-    
+
     const debouncedSetFormChanges = debounce(handleFormOnChange, 500)
-    
+
     // TODO: change
     const generateFilterForm = (allFiltersValues: AllFiltersValues) => {
         return (
             <form ref={form} className='filter__form' onChange={debouncedSetFormChanges}>
                 {generateSections(allFiltersValues)}
             </form>
+        )
+    }
+
+    let content = null
+
+    if (allFiltersValues) {
+        content = (
+            <div className="pharmCard__container">
+                {allFiltersValues ? generateFilterForm(allFiltersValues) : null}
+            </div>
         )
     }
 
@@ -111,9 +122,7 @@ function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterPr
                     <button className="h-[50px] bg-[var(--gray-100)] w-full rounded-[5px]">Антибактериальные средства</button>
                 </div>
             </div>
-            <div className="pharmCard__container">
-                {allFiltersValues ? generateFilterForm(allFiltersValues) : null}
-            </div>
+            {content}
             {/* <div className="pharmCard__container">
                 <button
                     className='p-[8px_16px] bg-[var(--blue-400)] text-[var(--white)] rounded-[8px]'
@@ -238,4 +247,4 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
     })
 }
 
-export default ProductsFilter
+export default memo(ProductsFilter)
