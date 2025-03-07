@@ -1,13 +1,17 @@
+import { useRef } from 'react'
+
 import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { ucFirst } from '@/scripts/helpers/string'
+import debounce from '@/scripts/helpers/debounce'
 
 import { FILTERS_NAMES } from '@/react/views/pharmProducts/constants'
 
-import { AllFiltersValues, ProductFilter } from '@/react/views/pharmProducts/@types'
+import { AllFiltersValues, ProductFilter, SelectedFilters, CustomPharmProductPrice } from '@/react/views/pharmProducts/@types'
+import { FormEventHandler } from 'react'
 
 const FILTER_LOCALES: Record<ProductFilter, string> = {
     [FILTERS_NAMES.price]: "цена",
@@ -18,9 +22,87 @@ const FILTER_LOCALES: Record<ProductFilter, string> = {
 
 type ProductsFilterProps = {
     allFiltersValues: AllFiltersValues | undefined,
+    setSelectedFilters: (filters: SelectedFilters) => void,
 }
 
-function ProductsFilter({allFiltersValues}: ProductsFilterProps) {
+function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterProps) {
+    const form = useRef<HTMLFormElement>(null)
+
+    const handleFormOnChange: FormEventHandler<HTMLFormElement> = (event) => {
+        event.preventDefault()
+
+        if (form.current && allFiltersValues) {
+            const formData = new FormData(form.current)
+            const values = new Map()
+            const priceFilter: CustomPharmProductPrice = {minPrice: "", maxPrice: ""}
+
+            for (const pair of formData.entries()) {
+                const inputName = pair[0]
+                const value = pair[1]
+
+                const lastSymbolIndex = inputName.indexOf("_")
+
+                if (lastSymbolIndex !== -1) { /* not price and not boolean filter */
+                    const myFilterName = inputName.slice(0, lastSymbolIndex) as ProductFilter
+                    const valueIndex = Number(inputName.slice(lastSymbolIndex + 1))
+                    const valuesFromMap = values.get(myFilterName)
+
+                    const filterValues = allFiltersValues[myFilterName]
+
+                    const isFiltersValuesArr = Array.isArray(filterValues)
+
+                    if (values.has(myFilterName) && Array.isArray(valuesFromMap)) {
+                        if (value === "on") {
+                            if (allFiltersValues) {
+                                
+
+                                if (isFiltersValuesArr && filterValues[valueIndex]) {
+                                    valuesFromMap.push(filterValues[valueIndex])
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        if (isFiltersValuesArr && filterValues[valueIndex]) {
+                            values.set(myFilterName, [filterValues[valueIndex]])
+                        }
+                    }
+                }
+                else if (inputName === "minPrice" || inputName === "maxPrice") { /* price filter */
+                    const priceInputValue = value !== "" ? Number(value) : ""
+
+                    if (Number.isInteger(priceInputValue)) {
+                        priceFilter[inputName] = priceInputValue
+                    }
+                }
+                else { /* boolean filter */
+                    if (value === "on") {
+                        values.set(inputName, true)
+                    }
+                }
+            }
+
+            if (priceFilter.maxPrice !== "" || priceFilter.minPrice !== "") {
+                values.set("price", priceFilter)
+            }
+
+            const result = Object.fromEntries(values.entries()) as SelectedFilters
+
+            setSelectedFilters(result)
+        }
+    }
+    
+    const debouncedSetFormChanges = debounce(handleFormOnChange, 500)
+    
+    // TODO: change
+    const generateFilterForm = (allFiltersValues: AllFiltersValues) => {
+        return (
+            <form ref={form} className='filter__form' onChange={debouncedSetFormChanges}>
+                {generateSections(allFiltersValues)}
+            </form>
+        )
+    }
+
     return (
         <div className="pharmProducts__filter filter pharmCard w-[300px]">
             <div className="filter__header border-b-1 border-[var(--gray-100)]">
@@ -31,13 +113,13 @@ function ProductsFilter({allFiltersValues}: ProductsFilterProps) {
             <div className="pharmCard__container">
                 {allFiltersValues ? generateFilterForm(allFiltersValues) : null}
             </div>
-            <div className="pharmCard__container">
+            {/* <div className="pharmCard__container">
                 <button
                     className='p-[8px_16px] bg-[var(--blue-400)] text-[var(--white)] rounded-[8px]'
                 >
                     Применить фильтр
                 </button>
-            </div>
+            </div> */}
         </div>
     )
 }
@@ -76,7 +158,7 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
 
             if (values.length) {
                 if (values.length == 1 && values[0] === true) { /* case with true false values */
-                    const inputName = `${filterName}_${0}`
+                    const inputName = filterName
                     const key = inputName
                     const name = ucFirst(FILTER_LOCALES[filterName])
 
@@ -106,14 +188,14 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
                         filterName,
                         <div className="flex flex-col">
                             {
-                                values.map((filterName, index) => {
+                                values.map((value, index) => {
                                     const inputName = `${filterName}_${index}`
                                     const key = inputName
         
                                     return (
                                         <div className="flex flex-row" key={key}>
                                             <input className="" type="checkbox" name={inputName}></input>
-                                            <label className="ml-[5px]" htmlFor={inputName}>{filterName}</label>
+                                            <label className="ml-[5px]" htmlFor={inputName}>{value}</label>
                                         </div>
                                     )
                                 })
@@ -133,23 +215,26 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
                 filterName,
                 <>
                     <div className="topRow flex flex-row justify-between">
-                        <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="minPrice" placeholder="От"></input>
-                        <input className="bg-[var(--gray-100)] w-[40%]" type="text" name="maxPrice" placeholder="До"></input>
+                        <input
+                            className="bg-[var(--gray-100)] w-[40%]"
+                            type="text"
+                            name="minPrice"
+                            placeholder="От"
+                            // onKeyDown={isNumberKey}
+                        ></input>
+                        <input
+                            className="bg-[var(--gray-100)] w-[40%]"
+                            type="text"
+                            name="maxPrice"
+                            placeholder="До"
+                            // onKeyDown={isNumberKey}
+                        ></input>
                     </div>
                     <div className="bottomRow"></div>
                 </>
             )
         }
     })
-}
-
-// TODO: change
-const generateFilterForm = (allFiltersValues: AllFiltersValues) => {
-    return (
-        <form  className='filter__form' onChange={(e) => {console.log(e)}}>
-            {generateSections(allFiltersValues)}
-        </form>
-    )
 }
 
 export default ProductsFilter

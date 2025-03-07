@@ -2,8 +2,9 @@ import { ObjectValues } from "@/scripts/helpers/types"
 import { FILTERS_NAMES, PRODUCTS_FIELDS } from "./constants"
 
 type PharmProductPrice = number | ""
-type CustomPharmProductPrice = { min: PharmProductPrice, max: PharmProductPrice }
+export type CustomPharmProductPrice = { minPrice: PharmProductPrice, maxPrice: PharmProductPrice }
 export type PharmProductIsByPrescription = boolean | ""
+export type CustomBooleanFilterValue = [true] | []
 
 export type ProductFilter = ObjectValues<typeof FILTERS_NAMES>
 
@@ -18,7 +19,7 @@ export type SelectedFilters = {
 in that case we dont need to show some filter (ex. country) */
 export type AllFiltersValues = {
     [FILTERS_NAMES.price]: CustomPharmProductPrice,
-    [FILTERS_NAMES.isByPrescription]: PharmProductIsByPrescription[] | [],
+    [FILTERS_NAMES.isByPrescription]: CustomBooleanFilterValue,
     [FILTERS_NAMES.country]: string[] | [],
     [FILTERS_NAMES.brand]: string[] | [],
 }

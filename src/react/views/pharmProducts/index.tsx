@@ -6,7 +6,7 @@ import useAptekaApi from "@/scripts/backend/aptekaApi/aptekaApi"
 import { PharmProduct } from "@/scripts/backend/aptekaApi/@types"
 
 import "./style.css"
-import { AllFiltersValues, PharmProductIsByPrescription, ProductFilter, SelectedFilters, TransformedPharmProductsData } from "./@types"
+import { AllFiltersValues, CustomBooleanFilterValue, CustomPharmProductPrice, PharmProductIsByPrescription, ProductFilter, SelectedFilters, TransformedPharmProductsData } from "./@types"
 import { PRODUCTS_FIELDS, FILTERS_NAMES } from "./constants"
 import FilterButton from "@/react/components/filterMarker"
 import CardListWithPaginator from "@/react/components/cardListWithPaginator"
@@ -41,7 +41,7 @@ function transformPharmProductsData(productsData: PharmProduct[]): TransformedPh
     })
 }
 
-function getPriceLimits(productsData: TransformedPharmProductsData[]) {
+function getLimits(productsData: TransformedPharmProductsData[]) {
     const priceLimits = productsData.reduce((accum: {min: "" | number, max: "" | number}, product) => {
             if (product.price !== "") {
                 if (accum.min !== "") {
@@ -66,6 +66,12 @@ function getPriceLimits(productsData: TransformedPharmProductsData[]) {
         }, {min: "", max: ""})
 
         return priceLimits
+}
+
+function getPriceLimits(productsData: TransformedPharmProductsData[]): CustomPharmProductPrice {
+    const limits = getLimits(productsData)
+
+    return {minPrice: limits.min, maxPrice: limits.max}
 }
 
 // TODO: create sort
@@ -103,7 +109,7 @@ function SelectedFiltersBlock({selectedFilters, deleteFilter}: SelectedFiltersBl
     )
 }
 
-const getBooleanFilterValues = (products: TransformedPharmProductsData[], filterName: ProductFilter) => {
+const getBooleanFilterValues = (products: TransformedPharmProductsData[], filterName: ProductFilter): CustomBooleanFilterValue => {
     let hasTrue = false, hasFalse = false
     let isNeedToCreateFilter = false
 
@@ -154,7 +160,7 @@ function PharmProducts() {
     const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>()
     // TODO: use
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [priceLimit, setPriceLimit] = useState<{max: number | "", min: number | ""}>()
+    const [priceLimit, setPriceLimit] = useState<{minPrice: number | "", maxPrice: number | ""}>()
     const [filtersValues, setFiltersValues] = useState<AllFiltersValues>()
     const [page, setPage] = useState(1)
 
@@ -175,12 +181,12 @@ function PharmProducts() {
                 const newFilterValues = setNewFilterValues(transformedData)
 
                 setFiltersValues(newFilterValues)
-                setPriceLimit(newFilterValues[FILTERS_NAMES.price])
+                // setPriceLimit(newFilterValues[FILTERS_NAMES.price])
 
-                const MOCK_FILTERS = {price: {min: 0, max: 100}}
+                // const MOCK_FILTERS = {price: {min: 0, max: 100}}
 
-                // TODO: change
-                setSelectedFilters(MOCK_FILTERS)
+                // // TODO: change
+                // setSelectedFilters(MOCK_FILTERS)
             }
         }
 
@@ -194,6 +200,16 @@ function PharmProducts() {
 
     const handleSetPage = useCallback((page: number) => {
         setPage(page)
+    }, [])
+
+    const handleFilterSelect = useCallback((filters: SelectedFilters) => {
+        setSelectedFilters((prevState) => {
+            if (prevState) {
+                console.log("filters", filters)
+            }
+
+            return prevState
+        })
     }, [])
 
     const deleteFilter = useCallback((deletedFilterName: ProductFilter) => {
@@ -222,6 +238,7 @@ function PharmProducts() {
                     <div className="flex flex-col">
                         <ProductsFilter
                             allFiltersValues={filtersValues}
+                            setSelectedFilters={handleFilterSelect}
                         />
                         <div className="spacer min-h-[50px]"></div>
                     </div>
