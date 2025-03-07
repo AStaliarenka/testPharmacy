@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { ucFirst } from '@/scripts/helpers/string'
 import debounce from '@/scripts/helpers/debounce'
+import { handleIntegerInputKeyDown } from '@/scripts/helpers/events'
 
 import { FILTERS_NAMES } from '@/react/views/pharmProducts/constants'
 
@@ -220,14 +221,14 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
                             type="text"
                             name="minPrice"
                             placeholder="От"
-                            // onKeyDown={isNumberKey}
+                            onKeyDown={handleIntegerInputKeyDown}
                         ></input>
                         <input
                             className="bg-[var(--gray-100)] w-[40%]"
                             type="text"
                             name="maxPrice"
                             placeholder="До"
-                            // onKeyDown={isNumberKey}
+                            onKeyDown={handleIntegerInputKeyDown}
                         ></input>
                     </div>
                     <div className="bottomRow"></div>
