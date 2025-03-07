@@ -175,7 +175,7 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
                     return (
                         <div key={key} className="pharmCard__container">
                             <div className="flex flex-row" key={key}>
-                                    <input className="" type="checkbox" name={inputName}></input>
+                                    <input className="" type="checkbox" name={inputName} id={inputName}></input>
                                     <label className="ml-[5px]" htmlFor={inputName}>{name}</label>
                             </div>
                         </div>
@@ -204,7 +204,7 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
         
                                     return (
                                         <div className="flex flex-row" key={key}>
-                                            <input className="" type="checkbox" name={inputName}></input>
+                                            <input className="" type="checkbox" name={inputName} id={inputName}></input>
                                             <label className="ml-[5px]" htmlFor={inputName}>{value}</label>
                                         </div>
                                     )
