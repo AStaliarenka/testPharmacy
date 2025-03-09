@@ -23,13 +23,14 @@ export const FILTER_LOCALES: Record<ProductFilter, string> = {
 
 type ProductsFilterProps = {
     allFiltersValues: AllFiltersValues | undefined,
-    setSelectedFilters: (filters: SelectedFilters) => void,
-    selectedFilters: SelectedFilters | undefined
+    selectFilters: (filters: SelectedFilters) => void,
+    selectedFilters: SelectedFilters | undefined,
+    filter: () => void
 }
 
 const FORM_ON_CHANGE_DELAY = 500 /* ms */
 
-function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterProps) {
+function ProductsFilter({allFiltersValues, selectFilters}: ProductsFilterProps) {
     const form = useRef<HTMLFormElement>(null)
 
     const handleFormOnChange: FormEventHandler<HTMLFormElement> = (event) => {
@@ -92,7 +93,7 @@ function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterPr
 
             const result = Object.fromEntries(values.entries()) as SelectedFilters
 
-            setSelectedFilters(result)
+            selectFilters(result)
         }
     }
 

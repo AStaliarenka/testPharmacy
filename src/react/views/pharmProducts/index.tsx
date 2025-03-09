@@ -149,11 +149,6 @@ function setNewFilterValues(products: TransformedPharmProductsData[]) {
 function PharmProducts() {
     const {pharmProducts, isLoading, isError} = useAptekaApi()
 
-    // TODO: use
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [pharmProductsData, setPharmProductsData] = useState<PharmProduct[]>()
-    // TODO: use
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [trasformedPharmProductsData, setTrasformedPharmProductsData] = useState<TransformedPharmProductsData[]>()
 
     const [filteredData, setFilteredData] = useState<TransformedPharmProductsData[]>()
@@ -169,14 +164,9 @@ function PharmProducts() {
             const data = await pharmProducts.get()
 
             if (data) {
-                setPharmProductsData(data)
-
                 const transformedData = transformPharmProductsData(data)
 
                 setTrasformedPharmProductsData(transformedData)
-
-                // TODO: check
-                setFilteredData(transformedData)
 
                 const newFilterValues = setNewFilterValues(transformedData)
 
@@ -194,9 +184,101 @@ function PharmProducts() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    const filter = useCallback(() => {
+        if (!trasformedPharmProductsData) { /* nothing to filter */
+            return
+        }
+
+        // TODO: mark cards block to gray
+
+        if (selectedFilters) {
+            const filters = Object.keys(selectedFilters) as unknown as ProductFilter[]
+
+            if (filters.length) {
+                const newFilteredData = trasformedPharmProductsData.filter(data => {
+                    let result = true
+
+                    for (const filter of filters) {
+                        const filterValues = selectedFilters[filter]
+                        const currentValue = data[filter]
+
+                        if (filter === "price") {
+                            if (data.price === "") {
+                                result = false
+                                break
+                            }
+                            
+                            const price = selectedFilters.price
+
+                            if (price) {
+                                const minPrice = price.minPrice
+                                const maxPrice = price.maxPrice
+
+                                if (maxPrice !=="" && minPrice !== "") { /* minPrice and maxPrice are selected */
+                                    if (data.price < minPrice || data.price > maxPrice) {
+                                        result = false
+                                        break
+                                    }
+                                }
+                                else if (maxPrice !=="") { /* maxPrice is selected */
+                                    if (data.price > maxPrice) {
+                                        result = false
+                                        break
+                                    }
+                                }
+                                else if (minPrice !=="") { /* minPrice is selected */
+                                    if (data.price < minPrice) {
+                                        result = false
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        else if (typeof filterValues === "boolean") { /* one chekBox */
+                            if (typeof currentValue !== "boolean") {
+                                result = false
+                                break
+                            }
+                            else if (currentValue !== filterValues) {
+                                result = false
+                                break
+                            }
+                        }
+                        else if (Array.isArray(filterValues)) { /* chekboxesList */
+                            if (filterValues.length) {
+                                const valuesSat = new Set(filterValues)
+
+                                if (!valuesSat.has(currentValue as string)) {
+                                    result = false
+                                    break
+                                }
+                            }
+                        }
+                    }
+
+                    return result
+                })
+
+                if (newFilteredData.length) {
+                    setFilteredData(newFilteredData)
+                }
+                else {
+                    setFilteredData([])
+                }
+            }
+            else {
+                setFilteredData(trasformedPharmProductsData)
+            }
+        }
+        else {
+            setFilteredData(trasformedPharmProductsData)
+        }
+    }, [selectedFilters, trasformedPharmProductsData])
+
     useEffect(() => {
+        filter()
         // TODO: filter data
-    }, [selectedFilters])
+    }, [filter])
 
     const handleSetPage = useCallback((page: number) => {
         setPage(page)
@@ -207,17 +289,17 @@ function PharmProducts() {
     }, [])
 
     const deleteFilter = useCallback((deletedFilterName: ProductFilter) => {
-            if (selectedFilters) {
-                const filterValue = selectedFilters[deletedFilterName]
+        if (selectedFilters) {
+            const filterValue = selectedFilters[deletedFilterName]
 
-                if (filterValue) {
-                    const newSelectedFilters = Object.assign({}, selectedFilters);
-                    delete newSelectedFilters[deletedFilterName]
+            if (filterValue) {
+                const newSelectedFilters = Object.assign({}, selectedFilters);
+                delete newSelectedFilters[deletedFilterName]
 
-                    setSelectedFilters(newSelectedFilters)
-                }
+                setSelectedFilters(newSelectedFilters)
             }
-        }, [selectedFilters])
+        }
+    }, [selectedFilters])
 
     let content: React.JSX.Element
 
@@ -232,8 +314,9 @@ function PharmProducts() {
                     <div className="flex flex-col">
                         <ProductsFilter
                             allFiltersValues={filtersValues}
-                            setSelectedFilters={handleFilterSelect}
+                            selectFilters={handleFilterSelect}
                             selectedFilters={selectedFilters}
+                            filter={filter}
                         />
                         <div className="spacer min-h-[50px]"></div>
                     </div>
