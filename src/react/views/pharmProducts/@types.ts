@@ -28,7 +28,7 @@ export type TransformedPharmProductsData = {
     [PRODUCTS_FIELDS.id]: number,
     [PRODUCTS_FIELDS.title]: string,
     [PRODUCTS_FIELDS.price]: PharmProductPrice,
-    [PRODUCTS_FIELDS.image]: string
+    [PRODUCTS_FIELDS.image]: string,
     [PRODUCTS_FIELDS.isByPrescription]: PharmProductIsByPrescription,
     [PRODUCTS_FIELDS.country]: string,
     [PRODUCTS_FIELDS.brand]: string,

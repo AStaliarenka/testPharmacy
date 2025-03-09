@@ -23,11 +23,15 @@ export const FILTER_LOCALES: Record<ProductFilter, string> = {
 
 type ProductsFilterProps = {
     allFiltersValues: AllFiltersValues | undefined,
-    setSelectedFilters: (filters: SelectedFilters) => void,
-    selectedFilters: SelectedFilters | undefined
+    selectFilters: (filters: SelectedFilters) => void,
+    selectedFilters: SelectedFilters | undefined,
+    filter: () => void,
+    updateFormState: (newState: Map<string, string>) => void
 }
 
-function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterProps) {
+const FORM_ON_CHANGE_DELAY = 500 /* ms */
+
+function ProductsFilter({allFiltersValues, selectFilters, updateFormState}: ProductsFilterProps) {
     const form = useRef<HTMLFormElement>(null)
 
     const handleFormOnChange: FormEventHandler<HTMLFormElement> = (event) => {
@@ -36,11 +40,13 @@ function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterPr
         if (form.current && allFiltersValues) {
             const formData = new FormData(form.current)
             const values = new Map()
+            const newFormState = new Map()
             const priceFilter: CustomPharmProductPrice = {minPrice: "", maxPrice: ""}
 
             for (const pair of formData.entries()) {
                 const inputName = pair[0]
                 const value = pair[1]
+                newFormState.set(inputName, value)
 
                 const lastSymbolIndex = inputName.indexOf("_")
 
@@ -90,11 +96,12 @@ function ProductsFilter({allFiltersValues, setSelectedFilters}: ProductsFilterPr
 
             const result = Object.fromEntries(values.entries()) as SelectedFilters
 
-            setSelectedFilters(result)
+            updateFormState(newFormState)
+            selectFilters(result)
         }
     }
 
-    const debouncedSetFormChanges = debounce(handleFormOnChange, 500)
+    const debouncedSetFormChanges = debounce(handleFormOnChange, FORM_ON_CHANGE_DELAY)
 
     // TODO: change
     const generateFilterForm = (allFiltersValues: AllFiltersValues) => {
@@ -143,9 +150,8 @@ const generateSection = (
     const key = `filter-${filterName}`
 
     return (
-        <Accordion key={key} defaultExpanded={defaultExpanded}>
+        <Accordion key={key} id={key} defaultExpanded={defaultExpanded}>
             <AccordionSummary
-                id={key}
                 expandIcon={<ExpandMoreIcon />}
             >
                 <span>
@@ -174,8 +180,8 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
 
                     return (
                         <div key={key} className="pharmCard__container">
-                            <div className="flex flex-row" key={key}>
-                                    <input className="" type="checkbox" name={inputName}></input>
+                            <div className="flex flex-row" key={key} id={`filter-${filterName}`}>
+                                    <input className="" type="checkbox" name={inputName} id={inputName}></input>
                                     <label className="ml-[5px]" htmlFor={inputName}>{name}</label>
                             </div>
                         </div>
@@ -204,7 +210,7 @@ const generateSections = (allFiltersValues: AllFiltersValues) => {
         
                                     return (
                                         <div className="flex flex-row" key={key}>
-                                            <input className="" type="checkbox" name={inputName}></input>
+                                            <input className="" type="checkbox" name={inputName} id={inputName}></input>
                                             <label className="ml-[5px]" htmlFor={inputName}>{value}</label>
                                         </div>
                                     )

@@ -149,44 +149,32 @@ function setNewFilterValues(products: TransformedPharmProductsData[]) {
 function PharmProducts() {
     const {pharmProducts, isLoading, isError} = useAptekaApi()
 
-    // TODO: use
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [pharmProductsData, setPharmProductsData] = useState<PharmProduct[]>()
-    // TODO: use
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [trasformedPharmProductsData, setTrasformedPharmProductsData] = useState<TransformedPharmProductsData[]>()
 
     const [filteredData, setFilteredData] = useState<TransformedPharmProductsData[]>()
     const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>()
-    // TODO: use
+    // TODO: use priceLimit
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [priceLimit, setPriceLimit] = useState<{minPrice: number | "", maxPrice: number | ""}>()
     const [filtersValues, setFiltersValues] = useState<AllFiltersValues>()
     const [page, setPage] = useState(1)
+
+    // TODO: use formState, or delete
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [formState, setFormState] = useState<Map<string, string>>(new Map())
 
     useEffect(() => {
         const fetchProducts = async () => {
             const data = await pharmProducts.get()
 
             if (data) {
-                setPharmProductsData(data)
-
                 const transformedData = transformPharmProductsData(data)
 
                 setTrasformedPharmProductsData(transformedData)
 
-                // TODO: check
-                setFilteredData(transformedData)
-
                 const newFilterValues = setNewFilterValues(transformedData)
 
                 setFiltersValues(newFilterValues)
-                // setPriceLimit(newFilterValues[FILTERS_NAMES.price])
-
-                // const MOCK_FILTERS = {price: {min: 0, max: 100}}
-
-                // // TODO: change
-                // setSelectedFilters(MOCK_FILTERS)
             }
         }
 
@@ -194,12 +182,108 @@ function PharmProducts() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    const filter = useCallback(() => {
+        if (!trasformedPharmProductsData) { /* nothing to filter */
+            return
+        }
+
+        // TODO: mark cards block to gray
+
+        if (selectedFilters) {
+            const filters = Object.keys(selectedFilters) as unknown as ProductFilter[]
+
+            if (filters.length) {
+                const newFilteredData = trasformedPharmProductsData.filter(data => {
+                    let result = true
+
+                    for (const filter of filters) {
+                        const filterValues = selectedFilters[filter]
+                        const currentValue = data[filter]
+
+                        if (filter === "price") {
+                            if (data.price === "") {
+                                result = false
+                                break
+                            }
+                            
+                            const price = selectedFilters.price
+
+                            if (price) {
+                                const minPrice = price.minPrice
+                                const maxPrice = price.maxPrice
+
+                                if (maxPrice !=="" && minPrice !== "") { /* minPrice and maxPrice are selected */
+                                    if (data.price < minPrice || data.price > maxPrice) {
+                                        result = false
+                                        break
+                                    }
+                                }
+                                else if (maxPrice !=="") { /* maxPrice is selected */
+                                    if (data.price > maxPrice) {
+                                        result = false
+                                        break
+                                    }
+                                }
+                                else if (minPrice !=="") { /* minPrice is selected */
+                                    if (data.price < minPrice) {
+                                        result = false
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        else if (typeof filterValues === "boolean") { /* one chekBox */
+                            if (typeof currentValue !== "boolean") {
+                                result = false
+                                break
+                            }
+                            else if (currentValue !== filterValues) {
+                                result = false
+                                break
+                            }
+                        }
+                        else if (Array.isArray(filterValues)) { /* chekboxesList */
+                            if (filterValues.length) {
+                                const valuesSat = new Set(filterValues)
+
+                                if (!valuesSat.has(currentValue as string)) {
+                                    result = false
+                                    break
+                                }
+                            }
+                        }
+                    }
+
+                    return result
+                })
+
+                if (newFilteredData.length) {
+                    setFilteredData(newFilteredData)
+                }
+                else {
+                    setFilteredData([])
+                }
+            }
+            else {
+                setFilteredData(trasformedPharmProductsData)
+            }
+        }
+        else {
+            setFilteredData(trasformedPharmProductsData)
+        }
+    }, [selectedFilters, trasformedPharmProductsData])
+
     useEffect(() => {
+        filter()
         // TODO: filter data
-    }, [selectedFilters])
+    }, [filter])
 
     const handleSetPage = useCallback((page: number) => {
         setPage(page)
+    }, [])
+
+    const updateFormState = useCallback((formState: Map<string, string>) => {
+        setFormState(formState)
     }, [])
 
     const handleFilterSelect = useCallback((filters: SelectedFilters) => {
@@ -207,17 +291,36 @@ function PharmProducts() {
     }, [])
 
     const deleteFilter = useCallback((deletedFilterName: ProductFilter) => {
-            if (selectedFilters) {
-                const filterValue = selectedFilters[deletedFilterName]
+        if (selectedFilters) {
+            const filterValue = selectedFilters[deletedFilterName]
 
-                if (filterValue) {
-                    const newSelectedFilters = Object.assign({}, selectedFilters);
-                    delete newSelectedFilters[deletedFilterName]
+            if (filterValue) {
+                const newSelectedFilters = Object.assign({}, selectedFilters);
+                delete newSelectedFilters[deletedFilterName]
 
-                    setSelectedFilters(newSelectedFilters)
-                }
+                setSelectedFilters(newSelectedFilters)
             }
-        }, [selectedFilters])
+
+            setFormState(prev => {
+                const resetedInputs = document.querySelectorAll<HTMLInputElement>(`#filter-${deletedFilterName} input`)
+
+                resetedInputs.forEach(node => {
+                    prev.delete(node.name)
+
+                    if (node.type === "text") {
+                        node.value = ""
+                    }
+                    else if (node.type === "checkbox") {
+                        node.checked = false
+                    }
+                })
+
+                return prev
+            })
+
+            
+        }
+    }, [selectedFilters])
 
     let content: React.JSX.Element
 
@@ -232,8 +335,10 @@ function PharmProducts() {
                     <div className="flex flex-col">
                         <ProductsFilter
                             allFiltersValues={filtersValues}
-                            setSelectedFilters={handleFilterSelect}
+                            selectFilters={handleFilterSelect}
                             selectedFilters={selectedFilters}
+                            filter={filter}
+                            updateFormState={updateFormState}
                         />
                         <div className="spacer min-h-[50px]"></div>
                     </div>
