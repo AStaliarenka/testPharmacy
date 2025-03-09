@@ -67,7 +67,7 @@ function CardListWithPaginator({filteredData, setPage, page, productsCount}: Car
     }
 
     return (
-        <div className="pharmProducts__productsListAndPaginator flex flex-col min-w-[1050px]">
+        <div className="pharmProducts__productsListAndPaginator flex flex-col min-w-[1050px] ml-[20px]">
             {content}
         </div>
     )
