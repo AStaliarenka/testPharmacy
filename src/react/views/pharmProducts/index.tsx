@@ -153,11 +153,15 @@ function PharmProducts() {
 
     const [filteredData, setFilteredData] = useState<TransformedPharmProductsData[]>()
     const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>()
-    // TODO: use
+    // TODO: use priceLimit
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [priceLimit, setPriceLimit] = useState<{minPrice: number | "", maxPrice: number | ""}>()
     const [filtersValues, setFiltersValues] = useState<AllFiltersValues>()
     const [page, setPage] = useState(1)
+
+    // TODO: use formState, or delete
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [formState, setFormState] = useState<Map<string, string>>(new Map())
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -171,12 +175,6 @@ function PharmProducts() {
                 const newFilterValues = setNewFilterValues(transformedData)
 
                 setFiltersValues(newFilterValues)
-                // setPriceLimit(newFilterValues[FILTERS_NAMES.price])
-
-                // const MOCK_FILTERS = {price: {min: 0, max: 100}}
-
-                // // TODO: change
-                // setSelectedFilters(MOCK_FILTERS)
             }
         }
 
@@ -284,6 +282,10 @@ function PharmProducts() {
         setPage(page)
     }, [])
 
+    const updateFormState = useCallback((formState: Map<string, string>) => {
+        setFormState(formState)
+    }, [])
+
     const handleFilterSelect = useCallback((filters: SelectedFilters) => {
         setSelectedFilters(filters)
     }, [])
@@ -298,6 +300,25 @@ function PharmProducts() {
 
                 setSelectedFilters(newSelectedFilters)
             }
+
+            setFormState(prev => {
+                const resetedInputs = document.querySelectorAll<HTMLInputElement>(`#filter-${deletedFilterName} input`)
+
+                resetedInputs.forEach(node => {
+                    prev.delete(node.name)
+
+                    if (node.type === "text") {
+                        node.value = ""
+                    }
+                    else if (node.type === "checkbox") {
+                        node.checked = false
+                    }
+                })
+
+                return prev
+            })
+
+            
         }
     }, [selectedFilters])
 
@@ -317,6 +338,7 @@ function PharmProducts() {
                             selectFilters={handleFilterSelect}
                             selectedFilters={selectedFilters}
                             filter={filter}
+                            updateFormState={updateFormState}
                         />
                         <div className="spacer min-h-[50px]"></div>
                     </div>
