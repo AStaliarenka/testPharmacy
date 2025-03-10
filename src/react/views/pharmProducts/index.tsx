@@ -12,6 +12,8 @@ import FilterButton from "@/react/components/filterMarker"
 import CardListWithPaginator from "@/react/components/cardListWithPaginator"
 import ProductsFilter from "@/react/components/productsFilter"
 
+import SortRichSelect from "@/react/components/sortSelect"
+
 const PRODUCTS_COUNT = 12
 
 function transformPharmProductsData(productsData: PharmProduct[]): TransformedPharmProductsData[] {
@@ -77,9 +79,7 @@ function getPriceLimits(productsData: TransformedPharmProductsData[]): CustomPha
 // TODO: create sort
 function SortBlock() {
     return (
-        <button disabled={true} className="pharmProducts__sortRow w-[200px] h-[50px] bg-[var(--gray-500)] rounded-[50px]">
-            Сортировка
-        </button>
+        <SortRichSelect/>
     )
 }
 
