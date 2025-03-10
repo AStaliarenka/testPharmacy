@@ -14,3 +14,9 @@ export const FILTERS_NAMES = {
     brand: PRODUCTS_FIELDS.brand,
     isByPrescription: PRODUCTS_FIELDS.isByPrescription,
 } as const
+
+export const SORT_TYPES = {
+    relev: "relev",
+    cheap: "cheap",
+    reach: "reach",
+} as const

@@ -6,7 +6,7 @@ import useAptekaApi from "@/scripts/backend/aptekaApi/aptekaApi"
 import { PharmProduct } from "@/scripts/backend/aptekaApi/@types"
 
 import "./style.css"
-import { AllFiltersValues, CustomBooleanFilterValue, CustomPharmProductPrice, PharmProductIsByPrescription, ProductFilter, SelectedFilters, TransformedPharmProductsData } from "./@types"
+import { AllFiltersValues, CustomBooleanFilterValue, CustomPharmProductPrice, PharmProductIsByPrescription, ProductFilter, SelectedFilters, SortType, TransformedPharmProductsData } from "./@types"
 import { PRODUCTS_FIELDS, FILTERS_NAMES } from "./constants"
 import FilterButton from "@/react/components/filterMarker"
 import CardListWithPaginator from "@/react/components/cardListWithPaginator"
@@ -74,13 +74,6 @@ function getPriceLimits(productsData: TransformedPharmProductsData[]): CustomPha
     const limits = getLimits(productsData)
 
     return {minPrice: limits.min, maxPrice: limits.max}
-}
-
-// TODO: create sort
-function SortBlock() {
-    return (
-        <SortRichSelect/>
-    )
 }
 
 type SelectedFiltersBlockProps = {
@@ -322,6 +315,68 @@ function PharmProducts() {
         }
     }, [selectedFilters])
 
+    const sortFunctions = (data: TransformedPharmProductsData[]): Record<SortType, () => TransformedPharmProductsData[]> => {
+        return {
+            relev: () => {
+                return data.toSorted(({id: a}, {id: b}) => {
+                    if (a < b) {
+                        return -1
+                    }
+                    else if (a < b) {
+                        return 1
+                    }
+
+                    return 0
+                })
+            },
+            reach: () => {
+                return data.toSorted(({price: a}, {price: b}) => {
+                    if (a > b) {
+                        return -1
+                    }
+                    else if (a > b) {
+                        return 1
+                    }
+
+                    return 0
+                })
+            },
+            cheap: () => {
+                return data.toSorted(({price: a}, {price: b}) => {
+                    if (a < b) {
+                        return -1
+                    }
+                    else if (a < b) {
+                        return 1
+                    }
+
+                    return 0
+                })
+            },
+        }
+    }
+
+    const sort = useCallback((sortType: SortType) => {
+        setFilteredData((prev) => {
+            if (prev) {
+                return sortFunctions(prev)[sortType]()
+            }
+            return prev
+        })
+        console.log("SORT", sortType)
+    }, [])
+
+    function SortBlock({sort}: {sort: (sortType: SortType) => void}) {
+        return (
+            <div className="flex flex-row">
+                <SortRichSelect sort={sort}/>
+                <div>
+                    {/* TODO */}
+                </div>
+            </div>
+        )
+    }
+
     let content: React.JSX.Element
 
     if (!isLoading && !isError && filteredData) {
@@ -329,7 +384,7 @@ function PharmProducts() {
             <>
                 <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
                     <SelectedFiltersBlock selectedFilters={selectedFilters} deleteFilter={deleteFilter}/>
-                    <SortBlock/>
+                    <SortBlock sort={sort}/>
                 </div>
                 <div className="pharmProducts__filterAndProductsList flex flex-row justify-between">
                     <div className="flex flex-col">

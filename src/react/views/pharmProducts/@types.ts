@@ -1,5 +1,5 @@
 import { ObjectValues } from "@/scripts/helpers/types"
-import { FILTERS_NAMES, PRODUCTS_FIELDS } from "./constants"
+import { FILTERS_NAMES, PRODUCTS_FIELDS, SORT_TYPES } from "./constants"
 
 type PharmProductPrice = number | ""
 export type CustomPharmProductPrice = { minPrice: PharmProductPrice, maxPrice: PharmProductPrice }
@@ -7,6 +7,8 @@ export type PharmProductIsByPrescription = boolean | ""
 export type CustomBooleanFilterValue = [true] | []
 
 export type ProductFilter = ObjectValues<typeof FILTERS_NAMES>
+
+export type SortType = ObjectValues<typeof SORT_TYPES>
 
 export type SelectedFilters = {
     [FILTERS_NAMES.price]?: CustomPharmProductPrice,
