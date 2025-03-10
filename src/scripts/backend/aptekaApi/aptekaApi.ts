@@ -33,7 +33,7 @@ function useAptekaApi() {
                 if (res.ok) {
                     const data = await res.json() as unknown as PharmProduct[]
    
-                    if (data) {
+                    if (data && data.length) {
                         return data
                     }
                     else {
@@ -43,10 +43,14 @@ function useAptekaApi() {
                 else {
                     throw new Error(`Request failed, Status: ${res.status}`)
                 }
-            } catch (error) {
+            } catch (error: unknown) {
                 console.log(error)
 
-                throw new Error("Something went wrong")
+                if (error instanceof Error) {
+                    return error
+                } else {
+                    return new Error("Something went wrong")
+                }
             }
         }
     }

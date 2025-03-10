@@ -152,22 +152,29 @@ function PharmProducts() {
     const [filtersValues, setFiltersValues] = useState<AllFiltersValues>()
     const [page, setPage] = useState(1)
 
+    const [isError, setIsError] = useState(false)
+    const [errorMsg, setErrorMsg] = useState("")
+
     // TODO: use formState, or delete
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [formState, setFormState] = useState<Map<string, string>>(new Map())
 
     useEffect(() => {
         const fetchProducts = async () => {
-
             const data = await loadProductsData()
 
-
             if (data) {
-                const transformedData = transformPharmProductsData(data)
-
-                setTrasformedPharmProductsData(transformedData)
-
-                setFiltersValues(getAllValuesForFilter(transformedData))
+                if (data instanceof Error) {
+                    setIsError(true)
+                    setErrorMsg(data.message)
+                }
+                else if (data.length) {
+                    const transformedData = transformPharmProductsData(data)
+    
+                    setTrasformedPharmProductsData(transformedData)
+    
+                    setFiltersValues(getAllValuesForFilter(transformedData))
+                }
             }
         }
 
@@ -379,7 +386,7 @@ function PharmProducts() {
 
     let content: React.JSX.Element
 
-    if (filteredData) {
+    if (!isError && filteredData) {
         content = (
             <>
                 <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
@@ -408,7 +415,9 @@ function PharmProducts() {
             </>
         )
     }
-    else {
+    else if (isError) {
+        content = <>{errorMsg}</> /* TODO: change */
+    } else {
         content = <>WAIT...</> /* TODO: change */
     }
 
