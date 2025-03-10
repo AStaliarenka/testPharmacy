@@ -1,34 +1,24 @@
-import { useState } from "react"
-
 import { PharmProduct } from "./@types"
-
+import delay from "@/scripts/helpers/common"
 // TODO: delete MOCK_DATA
 import {data as MOCK_DATA} from "./mockData"
 
 function useAptekaApi() {
-    const [isLoading, setLoading] = useState(false)
-    const [isError, setError] = useState<Error | null>(null)
-
-    const clearErrors = () => {
-        setError(null)
-    }
-
     const pharmProducts = {
         get: async () => {
-            clearErrors()
-
-            const BASE_URL = process.env.NEXT_PUBLIC_SERVER_HOST
+            // TODO: uncomment 1st const and comment 2nd
+            // const BASE_URL = process.env.NEXT_PUBLIC_SERVER_HOST
+            const BASE_URL = ""
 
             if (!BASE_URL) {
-                // return
-
-                // TODO: delete MOCK_DATA
+                // TODO: delete MOCK_DATA and delay
+                await delay(1000)
                 return MOCK_DATA
+
+                // return
             }
 
             try {
-                setLoading(true)
-
                 const res = await fetch(
                     `${BASE_URL}/api/products`,
                     {
@@ -42,32 +32,30 @@ function useAptekaApi() {
 
                 if (res.ok) {
                     const data = await res.json() as unknown as PharmProduct[]
-
-                    setLoading(false)
-    
-                    if (data) {
-                        setLoading(false)
+   
+                    if (data && data.length) {
                         return data
                     }
                     else {
-                        setError(new Error("No data"))
+                        throw new Error("No data")
                     }
                 }
                 else {
-                    setError(new Error(`Request failed, Status: ${res.status}`))
+                    throw new Error(`Request failed, Status: ${res.status}`)
                 }
-
-                setLoading(false)
-
-            } catch (error) {
-                setError(new Error("Something went wron"))
-
+            } catch (error: unknown) {
                 console.log(error)
+
+                if (error instanceof Error) {
+                    return error
+                } else {
+                    return new Error("Something went wrong")
+                }
             }
         }
     }
 
-    return {pharmProducts, isLoading, isError, clearErrors}
+    return {pharmProducts}
 }
 
 export default useAptekaApi

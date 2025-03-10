@@ -6,11 +6,13 @@ import useAptekaApi from "@/scripts/backend/aptekaApi/aptekaApi"
 import { PharmProduct } from "@/scripts/backend/aptekaApi/@types"
 
 import "./style.css"
-import { AllFiltersValues, CustomBooleanFilterValue, CustomPharmProductPrice, PharmProductIsByPrescription, ProductFilter, SelectedFilters, TransformedPharmProductsData } from "./@types"
+import { AllFiltersValues, CustomBooleanFilterValue, CustomPharmProductPrice, PharmProductIsByPrescription, ProductFilter, SelectedFilters, SortType, TransformedPharmProductsData } from "./@types"
 import { PRODUCTS_FIELDS, FILTERS_NAMES } from "./constants"
 import FilterButton from "@/react/components/filterMarker"
 import CardListWithPaginator from "@/react/components/cardListWithPaginator"
 import ProductsFilter from "@/react/components/productsFilter"
+
+import SortRichSelect from "@/react/components/sortSelect"
 
 const PRODUCTS_COUNT = 12
 
@@ -74,15 +76,6 @@ function getPriceLimits(productsData: TransformedPharmProductsData[]): CustomPha
     return {minPrice: limits.min, maxPrice: limits.max}
 }
 
-// TODO: create sort
-function SortBlock() {
-    return (
-        <button disabled={true} className="pharmProducts__sortRow w-[200px] h-[50px] bg-[var(--gray-500)] rounded-[50px]">
-            Сортировка
-        </button>
-    )
-}
-
 type SelectedFiltersBlockProps = {
     selectedFilters: SelectedFilters | undefined,
     deleteFilter: (a: ProductFilter) => void,
@@ -131,7 +124,7 @@ const getBooleanFilterValues = (products: TransformedPharmProductsData[], filter
     return isNeedToCreateFilter ? [true] : []
 }
 
-function setNewFilterValues(products: TransformedPharmProductsData[]) {
+function getAllValuesForFilter(products: TransformedPharmProductsData[]) {
     // TODO: optimize
     const countries = Object.keys(Object.groupBy(products, ({ country }) => country)) || []
     const brands = Object.keys(Object.groupBy(products, ({ brand }) => brand)) || []
@@ -147,17 +140,22 @@ function setNewFilterValues(products: TransformedPharmProductsData[]) {
 }
 
 function PharmProducts() {
-    const {pharmProducts, isLoading, isError} = useAptekaApi()
+    const {pharmProducts: {get: loadProductsData}} = useAptekaApi()
 
     const [trasformedPharmProductsData, setTrasformedPharmProductsData] = useState<TransformedPharmProductsData[]>()
-
     const [filteredData, setFilteredData] = useState<TransformedPharmProductsData[]>()
     const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>()
+
     // TODO: use priceLimit
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [priceLimit, setPriceLimit] = useState<{minPrice: number | "", maxPrice: number | ""}>()
     const [filtersValues, setFiltersValues] = useState<AllFiltersValues>()
     const [page, setPage] = useState(1)
+
+    const [isError, setIsError] = useState(false)
+    const [errorMsg, setErrorMsg] = useState("")
+
+    const [sortState, setSortState] = useState<SortType>("relev")
 
     // TODO: use formState, or delete
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -165,21 +163,29 @@ function PharmProducts() {
 
     useEffect(() => {
         const fetchProducts = async () => {
-            const data = await pharmProducts.get()
+            const data = await loadProductsData()
 
             if (data) {
-                const transformedData = transformPharmProductsData(data)
-
-                setTrasformedPharmProductsData(transformedData)
-
-                const newFilterValues = setNewFilterValues(transformedData)
-
-                setFiltersValues(newFilterValues)
+                if (data instanceof Error) {
+                    setIsError(true)
+                    setErrorMsg(data.message)
+                }
+                else if (data.length) {
+                    const transformedData = transformPharmProductsData(data)
+    
+                    setTrasformedPharmProductsData(transformedData)
+    
+                    setFiltersValues(getAllValuesForFilter(transformedData))
+                }
             }
         }
 
         fetchProducts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    const updateSortState = useCallback((sortType: SortType) => {
+        setSortState(sortType)
     }, [])
 
     const filter = useCallback(() => {
@@ -273,10 +279,62 @@ function PharmProducts() {
         }
     }, [selectedFilters, trasformedPharmProductsData])
 
+    const sortFunctions = (data: TransformedPharmProductsData[]): Record<SortType, () => TransformedPharmProductsData[]> => {
+        return {
+            relev: () => {
+                return data.toSorted(({id: a}, {id: b}) => {
+                    if (a < b) {
+                        return -1
+                    }
+                    else if (a < b) {
+                        return 1
+                    }
+
+                    return 0
+                })
+            },
+            reach: () => {
+                return data.toSorted(({price: a}, {price: b}) => {
+                    if (a > b) {
+                        return -1
+                    }
+                    else if (a > b) {
+                        return 1
+                    }
+
+                    return 0
+                })
+            },
+            cheap: () => {
+                return data.toSorted(({price: a}, {price: b}) => {
+                    if (a < b) {
+                        return -1
+                    }
+                    else if (a < b) {
+                        return 1
+                    }
+
+                    return 0
+                })
+            },
+        }
+    }
+
+    const sort = useCallback((sortType: SortType) => {
+        setFilteredData((prev) => {
+            if (prev) {
+                return sortFunctions(prev)[sortType]()
+            }
+            return prev
+        })
+        console.log("SORT", sortType)
+    }, [])
+
     useEffect(() => {
+        // TODO: optimize
         filter()
-        // TODO: filter data
-    }, [filter])
+        sort(sortState)
+    }, [filter, sort, sortState])
 
     const handleSetPage = useCallback((page: number) => {
         setPage(page)
@@ -322,14 +380,20 @@ function PharmProducts() {
         }
     }, [selectedFilters])
 
+    
+
     let content: React.JSX.Element
 
-    if (!isLoading && !isError && filteredData) {
+    if (!isError && filteredData) {
         content = (
             <>
                 <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
                     <SelectedFiltersBlock selectedFilters={selectedFilters} deleteFilter={deleteFilter}/>
-                    <SortBlock/>
+                    <SortRichSelect
+                        sort={sort}
+                        sortState={sortState}
+                        updateSortState={updateSortState}
+                    />
                 </div>
                 <div className="pharmProducts__filterAndProductsList flex flex-row justify-between">
                     <div className="flex flex-col">
@@ -353,13 +417,9 @@ function PharmProducts() {
             </>
         )
     }
-    else if (isLoading) {
-        content = <>WAIT...</>
-    }
     else if (isError) {
-        content = <>{`Error: ${isError.name}, message: ${isError.message}`}</>
-    }
-    else {
+        content = <>{errorMsg}</> /* TODO: change */
+    } else {
         content = <>WAIT...</> /* TODO: change */
     }
 
