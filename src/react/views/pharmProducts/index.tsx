@@ -327,7 +327,6 @@ function PharmProducts() {
             }
             return prev
         })
-        console.log("SORT", sortType)
     }, [])
 
     useEffect(() => {
