@@ -5,21 +5,36 @@ function SortRichSelect() {
 
     const defaultValue = "relev"
 
+    const SELECT_IDs = {
+        INPUT_LABEL: {
+            ID: "sortSelectLabel",
+        },
+        SELECT: {
+            ID: "selectLabel",
+        },
+    }
+
+    const SORT_VALUES = {
+        relev: "По релевантности",
+        cheap: "Сначала дешевые",
+        reach: "Сначала дорогие",
+    } as const
+
     return (
-        <FormControl>
-            <InputLabel id="sortSelectLabel">
+        <FormControl className="w-[250px]">
+            <InputLabel id={SELECT_IDs.INPUT_LABEL.ID}>
                 Сортировка
             </InputLabel>
             <Select
-                labelId="sortSelectLabel"
-                id="selectLabel"
-                value={defaultValue}
-                label="По релевантности"
+                labelId={SELECT_IDs.INPUT_LABEL.ID}
+                id={SELECT_IDs.SELECT.ID}
+                defaultValue={defaultValue}
+                label={SORT_VALUES.relev}
                 onChange={handleChange}
             >
-                <MenuItem value={"relev"}>По релевантности</MenuItem>
-                <MenuItem value={"cheap"}>Сначала дешевые</MenuItem>
-                <MenuItem value={"reach"}>Сначала дорогие</MenuItem>
+                <MenuItem value={"relev"}>{SORT_VALUES.relev}</MenuItem>
+                <MenuItem value={"cheap"}>{SORT_VALUES.cheap}</MenuItem>
+                <MenuItem value={"reach"}>{SORT_VALUES.reach}</MenuItem>
             </Select>
         </FormControl>
     )
