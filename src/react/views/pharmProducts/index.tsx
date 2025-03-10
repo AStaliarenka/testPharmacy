@@ -373,17 +373,6 @@ function PharmProducts() {
         console.log("SORT", sortType)
     }, [])
 
-    function SortBlock({sort}: {sort: (sortType: SortType) => void}) {
-        return (
-            <div className="flex flex-row">
-                <SortRichSelect sort={sort}/>
-                <div>
-                    {/* TODO */}
-                </div>
-            </div>
-        )
-    }
-
     let content: React.JSX.Element
 
     if (!isError && filteredData) {
@@ -391,7 +380,7 @@ function PharmProducts() {
             <>
                 <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
                     <SelectedFiltersBlock selectedFilters={selectedFilters} deleteFilter={deleteFilter}/>
-                    <SortBlock sort={sort}/>
+                    <SortRichSelect sort={sort}/>
                 </div>
                 <div className="pharmProducts__filterAndProductsList flex flex-row justify-between">
                     <div className="flex flex-col">

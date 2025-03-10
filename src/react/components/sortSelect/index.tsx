@@ -1,4 +1,4 @@
-import { useState, memo } from "react"
+import { useState, memo, useEffect } from "react"
 
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material"
 import { SortType } from "@/react/views/pharmProducts/@types"
@@ -18,8 +18,7 @@ function SortRichSelect({sort}: SortRichSelectProps) {
 
         setSelectValue(value)
 
-        // TODO: fix
-        // sort(value)
+        sort(value)
     }
 
     const SELECT_IDs = {
