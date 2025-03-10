@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 import { PharmProduct } from "./@types"
-
+import delay from "@/scripts/helpers/common"
 // TODO: delete MOCK_DATA
 import {data as MOCK_DATA} from "./mockData"
 
@@ -20,8 +20,9 @@ function useAptekaApi() {
             const BASE_URL = process.env.NEXT_PUBLIC_SERVER_HOST
 
             if (!BASE_URL) {
+                await delay(1000)
                 // return
-
+                
                 // TODO: delete MOCK_DATA
                 return MOCK_DATA
             }
