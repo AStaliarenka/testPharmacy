@@ -124,7 +124,7 @@ const getBooleanFilterValues = (products: TransformedPharmProductsData[], filter
     return isNeedToCreateFilter ? [true] : []
 }
 
-function setNewFilterValues(products: TransformedPharmProductsData[]) {
+function getAllValuesForFilter(products: TransformedPharmProductsData[]) {
     // TODO: optimize
     const countries = Object.keys(Object.groupBy(products, ({ country }) => country)) || []
     const brands = Object.keys(Object.groupBy(products, ({ brand }) => brand)) || []
@@ -140,12 +140,12 @@ function setNewFilterValues(products: TransformedPharmProductsData[]) {
 }
 
 function PharmProducts() {
-    const {pharmProducts, isLoading, isError} = useAptekaApi()
+    const {pharmProducts: {get: loadProductsData}} = useAptekaApi()
 
     const [trasformedPharmProductsData, setTrasformedPharmProductsData] = useState<TransformedPharmProductsData[]>()
-
     const [filteredData, setFilteredData] = useState<TransformedPharmProductsData[]>()
     const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>()
+
     // TODO: use priceLimit
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [priceLimit, setPriceLimit] = useState<{minPrice: number | "", maxPrice: number | ""}>()
@@ -158,16 +158,16 @@ function PharmProducts() {
 
     useEffect(() => {
         const fetchProducts = async () => {
-            const data = await pharmProducts.get()
+
+            const data = await loadProductsData()
+
 
             if (data) {
                 const transformedData = transformPharmProductsData(data)
 
                 setTrasformedPharmProductsData(transformedData)
 
-                const newFilterValues = setNewFilterValues(transformedData)
-
-                setFiltersValues(newFilterValues)
+                setFiltersValues(getAllValuesForFilter(transformedData))
             }
         }
 
@@ -379,7 +379,7 @@ function PharmProducts() {
 
     let content: React.JSX.Element
 
-    if (!isLoading && !isError && filteredData) {
+    if (filteredData) {
         content = (
             <>
                 <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
@@ -407,12 +407,6 @@ function PharmProducts() {
                 <div className="pharmProducts__footer h-[50px]"></div>
             </>
         )
-    }
-    else if (isLoading) {
-        content = <>WAIT...</>
-    }
-    else if (isError) {
-        content = <>{`Error: ${isError.name}, message: ${isError.message}`}</>
     }
     else {
         content = <>WAIT...</> /* TODO: change */
