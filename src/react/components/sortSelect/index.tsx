@@ -1,4 +1,4 @@
-import { useState, memo, useEffect } from "react"
+import { memo } from "react"
 
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material"
 import { SortType } from "@/react/views/pharmProducts/@types"
@@ -7,16 +7,16 @@ import { SORT_TYPES } from "@/react/views/pharmProducts/constants"
 import { SelectChangeEvent } from "@mui/material"
 
 type SortRichSelectProps = {
-    sort: (sortType: SortType) => void
+    sort: (sortType: SortType) => void,
+    sortState: SortType,
+    updateSortState: (sortType: SortType) => void,
 }
 
-function SortRichSelect({sort}: SortRichSelectProps) {
-    const [selectValue, setSelectValue] = useState<SortType>("relev")
-
+function SortRichSelect({sort, sortState, updateSortState}: SortRichSelectProps) {
     const handleChange = (event: SelectChangeEvent<SortType>) => {
         const value = event.target.value as SortType
 
-        setSelectValue(value)
+        updateSortState(value)
 
         sort(value)
     }
@@ -46,7 +46,7 @@ function SortRichSelect({sort}: SortRichSelectProps) {
             <Select
                 labelId={SELECT_IDs.INPUT_LABEL.ID}
                 id={SELECT_IDs.SELECT.ID}
-                value={selectValue}
+                value={sortState}
                 label={label}
                 onChange={handleChange}
             >

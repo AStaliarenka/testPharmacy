@@ -155,6 +155,8 @@ function PharmProducts() {
     const [isError, setIsError] = useState(false)
     const [errorMsg, setErrorMsg] = useState("")
 
+    const [sortState, setSortState] = useState<SortType>("relev")
+
     // TODO: use formState, or delete
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [formState, setFormState] = useState<Map<string, string>>(new Map())
@@ -180,6 +182,10 @@ function PharmProducts() {
 
         fetchProducts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    const updateSortState = useCallback((sortType: SortType) => {
+        setSortState(sortType)
     }, [])
 
     const filter = useCallback(() => {
@@ -273,55 +279,6 @@ function PharmProducts() {
         }
     }, [selectedFilters, trasformedPharmProductsData])
 
-    useEffect(() => {
-        filter()
-        // TODO: filter data
-    }, [filter])
-
-    const handleSetPage = useCallback((page: number) => {
-        setPage(page)
-    }, [])
-
-    const updateFormState = useCallback((formState: Map<string, string>) => {
-        setFormState(formState)
-    }, [])
-
-    const handleFilterSelect = useCallback((filters: SelectedFilters) => {
-        setSelectedFilters(filters)
-    }, [])
-
-    const deleteFilter = useCallback((deletedFilterName: ProductFilter) => {
-        if (selectedFilters) {
-            const filterValue = selectedFilters[deletedFilterName]
-
-            if (filterValue) {
-                const newSelectedFilters = Object.assign({}, selectedFilters);
-                delete newSelectedFilters[deletedFilterName]
-
-                setSelectedFilters(newSelectedFilters)
-            }
-
-            setFormState(prev => {
-                const resetedInputs = document.querySelectorAll<HTMLInputElement>(`#filter-${deletedFilterName} input`)
-
-                resetedInputs.forEach(node => {
-                    prev.delete(node.name)
-
-                    if (node.type === "text") {
-                        node.value = ""
-                    }
-                    else if (node.type === "checkbox") {
-                        node.checked = false
-                    }
-                })
-
-                return prev
-            })
-
-            
-        }
-    }, [selectedFilters])
-
     const sortFunctions = (data: TransformedPharmProductsData[]): Record<SortType, () => TransformedPharmProductsData[]> => {
         return {
             relev: () => {
@@ -373,6 +330,58 @@ function PharmProducts() {
         console.log("SORT", sortType)
     }, [])
 
+    useEffect(() => {
+        // TODO: optimize
+        filter()
+        sort(sortState)
+    }, [filter, sort, sortState])
+
+    const handleSetPage = useCallback((page: number) => {
+        setPage(page)
+    }, [])
+
+    const updateFormState = useCallback((formState: Map<string, string>) => {
+        setFormState(formState)
+    }, [])
+
+    const handleFilterSelect = useCallback((filters: SelectedFilters) => {
+        setSelectedFilters(filters)
+    }, [])
+
+    const deleteFilter = useCallback((deletedFilterName: ProductFilter) => {
+        if (selectedFilters) {
+            const filterValue = selectedFilters[deletedFilterName]
+
+            if (filterValue) {
+                const newSelectedFilters = Object.assign({}, selectedFilters);
+                delete newSelectedFilters[deletedFilterName]
+
+                setSelectedFilters(newSelectedFilters)
+            }
+
+            setFormState(prev => {
+                const resetedInputs = document.querySelectorAll<HTMLInputElement>(`#filter-${deletedFilterName} input`)
+
+                resetedInputs.forEach(node => {
+                    prev.delete(node.name)
+
+                    if (node.type === "text") {
+                        node.value = ""
+                    }
+                    else if (node.type === "checkbox") {
+                        node.checked = false
+                    }
+                })
+
+                return prev
+            })
+
+            
+        }
+    }, [selectedFilters])
+
+    
+
     let content: React.JSX.Element
 
     if (!isError && filteredData) {
@@ -380,7 +389,11 @@ function PharmProducts() {
             <>
                 <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
                     <SelectedFiltersBlock selectedFilters={selectedFilters} deleteFilter={deleteFilter}/>
-                    <SortRichSelect sort={sort}/>
+                    <SortRichSelect
+                        sort={sort}
+                        sortState={sortState}
+                        updateSortState={updateSortState}
+                    />
                 </div>
                 <div className="pharmProducts__filterAndProductsList flex flex-row justify-between">
                     <div className="flex flex-col">
