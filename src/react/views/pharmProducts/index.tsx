@@ -166,29 +166,6 @@ function PharmProducts({data}: PharmProductsProps) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [formState, setFormState] = useState<Map<string, string>>(new Map())
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            const data = await loadProductsData()
-
-            if (data) {
-                if (data instanceof Error) {
-                    setIsError(true)
-                    setErrorMsg(data.message)
-                }
-                else if (data.length) {
-                    const transformedData = transformPharmProductsData(data)
-    
-                    setTrasformedPharmProductsData(transformedData)
-    
-                    setFiltersValues(getAllValuesForFilter(transformedData))
-                }
-            }
-        }
-
-        fetchProducts()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
     const updateSortState = useCallback((sortType: SortType) => {
         setSortState(sortType)
     }, [])
