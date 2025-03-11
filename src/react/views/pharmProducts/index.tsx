@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
-import useAptekaApi from "@/scripts/backend/aptekaApi/aptekaApi"
+import { useEffect, useState, useCallback, useMemo } from "react"
 
 import { PharmProduct } from "@/scripts/backend/aptekaApi/@types"
 
@@ -139,21 +138,27 @@ function getAllValuesForFilter(products: TransformedPharmProductsData[]) {
     }
 }
 
-function PharmProducts() {
-    const {pharmProducts: {get: loadProductsData}} = useAptekaApi()
+type PharmProductsProps = {
+    data: PharmProduct[]
+}
 
-    const [trasformedPharmProductsData, setTrasformedPharmProductsData] = useState<TransformedPharmProductsData[]>()
-    const [filteredData, setFilteredData] = useState<TransformedPharmProductsData[]>()
+function PharmProducts({data}: PharmProductsProps) {
+    const transformedData: TransformedPharmProductsData[] = useMemo(() => {
+            return transformPharmProductsData(data)
+        }, [data])
+
+    const allFiltersValues: AllFiltersValues = useMemo(() => {
+            return getAllValuesForFilter(transformedData)
+        }, [transformedData])
+
+    const [filteredData, setFilteredData] = useState<TransformedPharmProductsData[]>(transformedData)
     const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>()
 
     // TODO: use priceLimit
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [priceLimit, setPriceLimit] = useState<{minPrice: number | "", maxPrice: number | ""}>()
-    const [filtersValues, setFiltersValues] = useState<AllFiltersValues>()
-    const [page, setPage] = useState(1)
 
-    const [isError, setIsError] = useState(false)
-    const [errorMsg, setErrorMsg] = useState("")
+    const [page, setPage] = useState(1)
 
     const [sortState, setSortState] = useState<SortType>("relev")
 
@@ -189,17 +194,13 @@ function PharmProducts() {
     }, [])
 
     const filter = useCallback(() => {
-        if (!trasformedPharmProductsData) { /* nothing to filter */
-            return
-        }
-
         // TODO: mark cards block to gray
 
         if (selectedFilters) {
             const filters = Object.keys(selectedFilters) as unknown as ProductFilter[]
 
             if (filters.length) {
-                const newFilteredData = trasformedPharmProductsData.filter(data => {
+                const newFilteredData = transformedData.filter(data => {
                     let result = true
 
                     for (const filter of filters) {
@@ -271,13 +272,13 @@ function PharmProducts() {
                 }
             }
             else {
-                setFilteredData(trasformedPharmProductsData)
+                setFilteredData(transformedData)
             }
         }
         else {
-            setFilteredData(trasformedPharmProductsData)
+            setFilteredData(transformedData)
         }
-    }, [selectedFilters, trasformedPharmProductsData])
+    }, [selectedFilters, transformedData])
 
     const sortFunctions = (data: TransformedPharmProductsData[]): Record<SortType, () => TransformedPharmProductsData[]> => {
         return {
@@ -379,14 +380,9 @@ function PharmProducts() {
         }
     }, [selectedFilters])
 
-    
-
-    let content: React.JSX.Element
-
-    if (!isError && filteredData) {
-        content = (
-            <>
-                <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
+    return (
+        <div className="pharmProducts p-[20px]">
+            <div className="pharmProducts__header flex flex-column h-[50px] mb-[20px]">
                     <SelectedFiltersBlock selectedFilters={selectedFilters} deleteFilter={deleteFilter}/>
                     <SortRichSelect
                         sort={sort}
@@ -397,7 +393,7 @@ function PharmProducts() {
                 <div className="pharmProducts__filterAndProductsList flex flex-row justify-between">
                     <div className="flex flex-col">
                         <ProductsFilter
-                            allFiltersValues={filtersValues}
+                            allFiltersValues={allFiltersValues}
                             selectFilters={handleFilterSelect}
                             filter={filter}
                             updateFormState={updateFormState}
@@ -412,18 +408,6 @@ function PharmProducts() {
                     />
                 </div>
                 <div className="pharmProducts__footer h-[50px]"></div>
-            </>
-        )
-    }
-    else if (isError) {
-        content = <>{errorMsg}</> /* TODO: change */
-    } else {
-        content = <>WAIT...</> /* TODO: change */
-    }
-
-    return (
-        <div className="pharmProducts p-[20px]">
-            {content}
         </div>
     )
 }
