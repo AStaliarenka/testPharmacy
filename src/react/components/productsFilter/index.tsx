@@ -24,7 +24,6 @@ export const FILTER_LOCALES: Record<ProductFilter, string> = {
 type ProductsFilterProps = {
     allFiltersValues: AllFiltersValues | undefined,
     selectFilters: (filters: SelectedFilters) => void,
-    selectedFilters: SelectedFilters | undefined,
     filter: () => void,
     updateFormState: (newState: Map<string, string>) => void
 }

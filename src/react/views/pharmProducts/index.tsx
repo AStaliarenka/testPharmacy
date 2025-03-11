@@ -399,7 +399,6 @@ function PharmProducts() {
                         <ProductsFilter
                             allFiltersValues={filtersValues}
                             selectFilters={handleFilterSelect}
-                            selectedFilters={selectedFilters}
                             filter={filter}
                             updateFormState={updateFormState}
                         />
